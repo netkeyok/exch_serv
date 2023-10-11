@@ -11,8 +11,10 @@ async def upload_data(file: bytes = File()):
     string = file.decode("utf-8-sig")
     # преобразуем строку в словарь
     dictionary = json.loads(string)
+    print(dictionary)
 # передаем словарь в модель Pydantic
     data = WI.Data(**dictionary)
+    
 # получаем имя пакета
     # package_name = data.PACKAGE.name
     # print(data.PACKAGE.POSTOBJECT)

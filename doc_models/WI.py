@@ -77,7 +77,7 @@ class SMDocuments(BaseModel):
     DOCTYPE: str
     BORNIN: str
     CLIENTINDEX: int
-    COMMENTARY: str
+    COMMENTARY: str|None=None 
     CREATEDAT: str
     CURRENCYMULTORDER: int
     CURRENCYRATE: float
@@ -89,8 +89,8 @@ class SMDocuments(BaseModel):
     LOCATIONTO: int
     OPCODE: int
     PRICEROUNDMODE: int
-    TOTALSUM: float
-    TOTALSUMCUR: float
+    TOTALSUM: float|None=None 
+    TOTALSUMCUR: float|None=None 
     USEROP: str | None = None
 
 class SMDocProps(BaseModel):
@@ -101,13 +101,13 @@ class SMDocProps(BaseModel):
 
 class WI(BaseModel):
     SMDOCUMENTS:list[SMDocuments]
-    SMDOCPROPS:list[SMDocProps]
+    SMDOCPROPS:list[SMDocProps]|None=None 
     SMSPEC:list[SMSpec]
-    SMWAYBILLSIN:list[SMWaybillIn]
-    SMDOCTRANSPORT:list[SMDocTransport]
-    SMSPECNACL:list[SMSpecNacl]
-    SMSPECTAX:list[SMSpecTax]
-    SMSPECSTAT:list[SMSpecStat]
+    SMWAYBILLSIN:list[SMWaybillIn]|None=None 
+    SMDOCTRANSPORT:list[SMDocTransport]|None=None 
+    SMSPECNACL: list[SMSpecNacl]|None=None 
+    SMSPECTAX:list[SMSpecTax]|None=None 
+    SMSPECSTAT:list[SMSpecStat]|None=None 
 
 class Item(BaseModel):
     description:str 
