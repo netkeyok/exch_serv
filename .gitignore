@@ -159,3 +159,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 main copy.py
+main backup.py
+test.py
+db_connections/_oracle_conn.py
