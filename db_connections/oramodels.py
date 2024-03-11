@@ -1,9 +1,11 @@
 import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
+from sqlalchemy import MetaData, Column, Integer, String, ForeignKey, DateTime, Float
 from sqlalchemy.orm import declarative_base, relationship
 
+#Определяем схему в базе Oracle, чтобы пользователь не supermag выполнял запросы.
+metadata_obj = MetaData(schema="SUPERMAG")
 # определить базовый класс для моделей SQLAlchemy
-Base = declarative_base()
+Base = declarative_base(metadata=metadata_obj)
 
 
 # определить класс для таблицы данных
@@ -118,6 +120,7 @@ class SMClientInfo(Base):
 
 class SMDocuments(Base):
     __tablename__ = 'SMDOCUMENTS'
+
     DOCTYPE = Column(String(2), primary_key=True, nullable=False)
     ID = Column(String(50), nullable=False)
     BORNIN = Column(String(16), nullable=False)
