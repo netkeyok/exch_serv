@@ -8,7 +8,6 @@ metadata_obj = MetaData(schema="SUPERMAG")
 Base = declarative_base(metadata=metadata_obj)
 
 
-# определить класс для таблицы данных
 # определяем класс для таблицы SMCARD
 class SMCard(Base):
     # указываем имя таблицы
@@ -140,3 +139,61 @@ class SMDocuments(Base):
     PRICEROUNDMODE = Column(Integer, nullable=False)
     ISROUBLES = Column(String(1), nullable=False, default='1')
     COMMENTARY = Column(String)
+
+
+class SADocDefaults(Base):
+    __tablename__ = 'SADOCDEFAULTS'
+
+    doctype = Column(String(2), primary_key=True, nullable=False)
+    location = Column(Integer, primary_key=True, nullable=False)
+    nameprefix = Column(String(10))
+    nameoutprefix = Column(String(10))
+    numbersize = Column(Integer, nullable=False)
+    pricekind = Column(Integer)
+
+class SMStoreLocations(Base):
+    __tablename__ = 'SMSTORELOCATIONS'
+
+    ID = Column(Integer, primary_key=True, nullable=False)
+    NAME = Column(String(255), nullable=False)
+    IDCLASS = Column(Integer, nullable=False)
+    ACCEPTED = Column(String(1), nullable=False)
+    PRTY = Column(Integer, nullable=False)
+    FLAGS = Column(Integer, nullable=False)
+    LOCTYPE = Column(Integer, nullable=False)
+    PARENTLOC = Column(Integer)
+    RGNID = Column(Integer, default=-1, nullable=False)
+    ADDRESS = Column(String(255))
+    TEL = Column(String(40))
+    FAX = Column(String(40))
+    COMMENTARY = Column(String(255))
+    ORDERALG = Column(String(255), default='*', nullable=False)
+    CARDTYPE = Column(Integer)
+    FORMATID = Column(Integer)
+    PRICINGMETHOD = Column(Integer, default=0, nullable=False)
+    SUGGESTORDERALG = Column(String(50), default='EFFECTIVE', nullable=False)
+    FLOORSPACE = Column(Float)
+    GLN = Column(String(13))
+    SHORTNAME = Column(String(255))
+    SPOILAGELOC = Column(Integer)
+    CLOSEDEDITDATE = Column(DateTime)
+    KPP = Column(String(9))
+    CLOSEDEDITDOCID = Column(String(50))
+    CLOSEDEDITDATEOLD = Column(DateTime)
+    CLOSEDEDITDOCIDOLD = Column(String(50))
+
+
+class SMSpecor(Base):
+    __tablename__ = 'SMSPECOR'
+
+    DOCTYPE = Column(String(2), primary_key=True, nullable=False)
+    DOCID = Column(String(50), primary_key=True, nullable=False)
+    SPECITEM = Column(Integer, primary_key=True, nullable=False)
+    DISPLAYITEM = Column(Integer, primary_key=True, nullable=False)
+    ARTICLE = Column(String(50), nullable=False)
+    QUANTITY = Column(Float)
+    SUGGESTQUANTITY = Column(Float)
+    ITEMPRICE = Column(Float)
+    TOTALPRICE = Column(Float)
+    ITEMPRICECUR = Column(Float)
+    TOTALPRICECUR = Column(Float)

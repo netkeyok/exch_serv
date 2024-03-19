@@ -1,4 +1,4 @@
-from sm_models import WI, RL, UI
+from sm_api_models import WI, RL, UI, OR
 
 
 def parse_ui(doc_dict):
@@ -176,3 +176,14 @@ def parse_wi(doc_dict):
 # print(f'article: {article}')
 # print(f'price: {itemprice}')
 # print(f'quantity: {quantity}')
+
+
+def parse_or(doc_dict):
+    data = OR.RootModel(**doc_dict)
+    # получаем список постобъектов
+    postobjects = data.PACKAGE.POSTOBJECT
+    doclist = []
+    for postobject in postobjects:
+        docid = postobject.Id
+        doclist.append(docid[2:])
+    return doclist

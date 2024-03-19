@@ -115,11 +115,12 @@ class SMDocProps(BaseModel):
     PARAMNAME: str
     PARAMVALUE: str
 
+
 class SLSpecqmismatch(BaseModel):
     DOCID: str
     DOCTYPE: str
     SPECITEM: int
-    ARTICLE: str | None = None
+    # ARTICLE: str | None = None
     QUANTBYDOC: int
     REASON: str | None = None
     REASON2: str | None = None

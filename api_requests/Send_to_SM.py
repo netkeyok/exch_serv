@@ -1,20 +1,18 @@
 import asyncio
 import aiohttp
 import json
-from sm_models.WI import Data, Package, Item, WI, SMDocuments
-from sm_models.WI import SMCommonbases, SMWaybillIn, SMSpec
-from load_to_cv import send_request
+from sm_api_models.WI import Data, Package, Item, WI, SMDocuments
+from sm_api_models.WI import SMCommonbases, SMWaybillIn, SMSpec, SLSpecqmismatch
+from Send_to_CV import send_request, permitdel
 from cv_models.Postuplenie import Postuplenie, DocumentItem
-
+from db_connections.functions import generate_number
 
 header = {'Content-Type': 'application/json'}
 
 
-async def load_wi():
-
+async def send_wi():
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
     url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
-
 
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
@@ -25,11 +23,82 @@ async def load_wi():
             data_list = data_js['value']
             for data in data_list:
                 doclist = Postuplenie(**data)
-                # print(doclist)
                 if doclist.finished:
-                    print(doclist.warehouseId, doclist.id, doclist.finished)
-                else:
-                    print(f'del {doclist.id}, {doclist.finished}')
+                    cv_date = doclist.createDate
+                    formatted_date = cv_date.strftime("%Y-%m-%dT%H:%M:%S")
+                    wi_id = generate_number(doclist.warehouseId)
+                    items = await get_wi_items(doclist.id, wi_id)
+                    # Создаем экземпляр модели
+                    wi_data = Data(
+                        PACKAGE=Package(
+                            name="package",
+                            POSTOBJECT=[
+                                Item(
+                                    description="Приходная накладная",
+                                    action="normal",
+                                    Id=f'WI{wi_id}',
+                                    WI=WI(
+                                        SMDOCUMENTS=[
+                                            SMDocuments(
+                                                ID=wi_id,
+                                                DOCTYPE="WI",
+                                                BORNIN="zW3taivnRyidInB3UjAdZQ00",
+                                                CLIENTINDEX=doclist.idKontragenta,
+                                                COMMENTARY=doclist.name,
+                                                CREATEDAT=formatted_date,
+                                                CURRENCYMULTORDER=0,
+                                                CURRENCYRATE=1.0,
+                                                CURRENCYTYPE=1,
+                                                DOCSTATE=2,
+                                                ISROUBLES="1",
+                                                LOCATIONTO=doclist.warehouseId,
+                                                OPCODE="0",
+                                                PRICEROUNDMODE=3,
+                                                TOTALSUM=doclist.summaDokumenta,
+                                                TOTALSUMCUR=doclist.summaDokumenta,
+                                            )],
+                                        SMCOMMONBASES=[
+                                            SMCommonbases(
+                                                ID=wi_id,
+                                                DOCTYPE="WI",
+                                                BASEDOCTYPE="OR",
+                                                BASEID=doclist.id,
+                                            )],
+                                        SMSPEC=items[0],
+                                        SLSPECQMISMATCH=items[1],
+                                        SMWAYBILLSIN=[
+                                            SMWaybillIn(
+                                                ID=wi_id,
+                                                DOCTYPE="WI",
+                                                GOODSOWNER=0,
+                                                # OURSELFCLIENT=101085,
+                                                PAYCASH="0",
+                                                SUPPLDOCSUM=doclist.summaDokumenta,  # Сумма по документу поставщика
+                                                SUPPLIERDOC=doclist.id,  # Номер документа поставщика
+                                                SUPPLIERDOCCREATE=formatted_date,  # Дата документа поставщика
+
+                                            )
+                                        ]
+                                    )
+                                )
+                            ]
+                        )
+                    )
+
+                    # Получаем словарь из экземпляра модели
+                    data_dict = wi_data.dict()
+
+                    # Получаем JSON строку из словаря
+                    data_json = json.dumps(data_dict, indent=4)
+                    cm_url = 'http://192.168.0.238:8080/in/json'
+
+                    # print(data_json)
+                    await send_request(cm_url, data_json)
+
+
+
+                # else:
+                #     print(f'del {doclist.id}, {doclist.finished}')
             # print(status)
             # Проверяем статус ответа и выводим результат
             if status not in (200,):
@@ -37,127 +106,52 @@ async def load_wi():
                 print(status)
                 print(response)
 
-async def get_wi_items(docid):
-    get_doc_items_url = f"http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie('{docid}')/declaredItems"
+
+async def get_wi_items(or_id, wi_id):
+    get_doc_items_url = f"http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie('{or_id}')/declaredItems"
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
         async with sessionapi.get(get_doc_items_url, headers=header) as response:
             # Получаем кодировку, статус и текст ответа асинхронно с помощью await
             status = response.status
             data_js = await response.json()
-            # print(data_js)
             data_list = data_js['value']
+            print(data_list)
+            specitem = 0
+            smspeclist = []
+            mismathlist = []
             for data in data_list:
                 docitems = DocumentItem(**data)
-                # print(docitems)
-                # print(docitems.uid,
-                #       docitems.productId,
-                #       docitems.productId,
-                #       docitems.declaredQuantity,
-                #       docitems.currentQuantity,
-                #       docitems.price,
-                #       docitems.cenaPostavki)
+                specitem += 1
+                # print(docitems.Price, docitems.PriceTotal)
                 smspec = SMSpec(
-                    DOCID="WI02PV257626",
+                    DOCID=wi_id,
                     DOCTYPE="WI",
-                    SPECITEM=1,
-                    ARTICLE="012248",
-                    DISPLAYITEM=1,
-                    ITEMPRICE=132.91,
-                    QUANTITY=4,
-                    TOTALPRICE=531.64,
-                    TOTALPRICECUR=531.64,
+                    SPECITEM=docitems.uid,
+                    ARTICLE=docitems.productId,
+                    DISPLAYITEM=specitem,
+                    ITEMPRICE=docitems.price,
+                    QUANTITY=docitems.currentQuantity,
+                    TOTALPRICE=docitems.priceTotal,
+                    TOTALPRICECUR=docitems.priceTotal
                 )
-            # print(status)
+                specmismath = SLSpecqmismatch(
+                    DOCID=wi_id,
+                    DOCTYPE="WI",
+                    SPECITEM=specitem,
+                    QUANTBYDOC=docitems.declaredQuantity,
+                )
+                smspeclist.append(smspec)
+                mismathlist.append(specmismath)
             # Проверяем статус ответа и выводим результат
             if status not in (200,):
                 print('Произошла ошибка при запросе на сервер')
                 print(status)
                 print(response)
+    return smspeclist, mismathlist
 
-
-
-spec_list = []
-# Список позиций накладных
-smspec = {
-    "DOCID": "WI02PV257626",
-    "DOCTYPE": "WI",
-    "SPECITEM": 1,
-    "ARTICLE": "012248",
-    "DISPLAYITEM": 1,
-    "ITEMPRICE": 132.91,
-    "QUANTITY": 4,
-    "TOTALPRICE": 531.64,
-    "TOTALPRICECUR": 531.64,
-}
-spec_list.append(smspec)
-# Создаем экземпляр модели
-WI_data = Data(
-    PACKAGE=Package(
-        name="example_package",
-        POSTOBJECT=[
-            Item(
-                description="Приходная накладная",
-                action="normal",
-                Id="WIWI02PV257626",
-                WI=WI(
-                    SMDOCUMENTS=[
-                        SMDocuments(
-                            ID="WI02PV257626",
-                            DOCTYPE="WI",
-                            BORNIN="zW3taivnRyidInB3UjAdZQ==",
-                            CLIENTINDEX=100995,
-                            COMMENTARY='Прием товара ТСД по заказу: ',
-                            CREATEDAT="2024-02-28T00:00:00",
-                            CURRENCYMULTORDER=0,
-                            CURRENCYRATE=1.0,
-                            CURRENCYTYPE=1,
-                            DOCSTATE=1,
-                            ISROUBLES="1",
-                            LOCATIONTO="23",
-                            OPCODE="0",
-                            PRICEROUNDMODE=3,
-                            TOTALSUM=531.64,
-                            TOTALSUMCUR=531.64,
-                        )],
-                    SMCOMMONBASES=[
-                        SMCommonbases(
-                            ID="WI02PV257626",
-                            DOCTYPE="WI",
-                            BASEDOCTYPE="OR",
-                            BASEID="18ORA-E630868",
-                        )],
-                    SMSPEC=spec_list,
-                    SMWAYBILLSIN=[
-                        SMWaybillIn(
-                            ID="WI02PV257626",
-                            DOCTYPE="WI",
-                            GOODSOWNER=0,
-                            # OURSELFCLIENT=101085,
-                            PAYCASH="0",
-                            SUPPLDOCSUM=0.0,  # Сумма по документу поставщика
-                            SUPPLIERDOC='aslakfnas',  # Номер документа поставщика
-                            SUPPLIERDOCCREATE="2024-02-28T00:00:00",  # Дата документа поставщика
-
-                        )
-                    ]
-                )
-            )
-        ]
-    )
-)
-
-# Получаем словарь из экземпляра модели
-data_dict = WI_data.dict()
-
-# Получаем JSON строку из словаря
-data_json = json.dumps(data_dict, indent=4)
-url = 'http://192.168.0.238:8080/in/json'
-
-
-# print(data_json)
 
 if __name__ == '__main__':
     # asyncio.run(send_request(url, data_json))
-    asyncio.run(get_wi_items())
-    # asyncio.run(load_wi())
+    # asyncio.run(get_wi_items('23ORA-NV96456'))
+    asyncio.run(send_wi())

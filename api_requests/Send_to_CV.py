@@ -11,9 +11,7 @@ from cv_models.Products import Product
 from cv_models.Contragents import Contragent
 from cv_models.Postuplenie import Postuplenie, DocumentItem
 from cv_models.Warehouse import Warehouse
-from db_connections.oramodels import SMStoreUnits, SMCard, SMClientInfo, SMDocuments
-from sm_models.SMstorelocations import SMStoreLocations
-from sm_models.SMSpecor import SMSpecor
+from db_connections.oramodels import SMStoreUnits, SMCard, SMClientInfo, SMDocuments, SMStoreLocations, SMSpecor
 from db_connections.oracle_conf import session
 from config import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent
 from config import postuplenie_url, warehouse_url
@@ -29,7 +27,7 @@ async def send_request(url, js_data):
         async with sessionapi.post(url, data=js_data, headers=header) as response:
             # Получаем статус и текст ответа
             status = response.status
-            text = await response.text()
+            # text = await response.text()
             # Проверяем статус ответа и выводим результат
             if status not in (200, 201, 204):
                 print(js_data)
@@ -180,7 +178,7 @@ async def get_articlelist():
 
 # Отправка документов на сервер.
 async def send_postuplenie(docid=None):
-    # Фильтр по дате, при щагрузке всех документов.
+    # Фильтр по дате, при загрузке всех документов.
     days_ago = datetime.now() - timedelta(days=2)
     # Если указан номер документа, то грузим строго по номеру. Номер получаем по API от СМ.
     if docid:
@@ -208,6 +206,7 @@ async def send_postuplenie(docid=None):
 
     # Получаем список словарей
     results = list(dict_iterator)
+
     # проходим по списку и отправляем на сервер.
     for result in results:
         original_datetime = result['CREATEDAT']
@@ -218,19 +217,27 @@ async def send_postuplenie(docid=None):
         items = await send_postuplenie_items(result['ID'])
         doc = Postuplenie(
             id=result['ID'],
-            name=f"Поставка по заказу: {result['ID']}",
-            lastChangeDate=formatted_datetime_with_timezone,
+            name=f"Прием ТСД по заказу: {result['ID']}",
             createDate=formatted_datetime_with_timezone,
-            documentTypeName='Поступление',
             warehouseId=str(result['LOCATION']),
             idKontragenta=str(result['CLIENTINDEX']),
-            summadokumenta=result['TOTALSUM'],
+            SummaDokumenta=result['TOTALSUM'],
             declaredItems=items
         )
-
         postuplenie_json = doc.model_dump_json(exclude_none=True)
         print(postuplenie_json)
         await send_request(postuplenie_url, postuplenie_json)
+
+
+async def permitdel(docid):
+    doc = Postuplenie(
+        id=docid,
+        PermitDel=True
+    )
+
+    postuplenie_json = doc.model_dump_json(exclude_none=True)
+    print(postuplenie_json)
+    await send_request(postuplenie_url, postuplenie_json)
 
 
 async def send_storeloc():
@@ -270,9 +277,9 @@ async def clear_postuplenie():
             data_list = data_js['value']
             for data in data_list:
                 doclist = Postuplenie(**data)
-                if doclist.finished:
-                    print(doclist.id, doclist.finished)
-                else:
+                if doclist.finished and doclist.PermitDel == True:
+                #     print(f'del {doclist.id}, {doclist.finished}')
+                # else:
                     print(f'del {doclist.id}, {doclist.finished}')
                     del_url_with_id = f'{del_url}({doclist.id})'
                     async with sessionapi.delete(del_url_with_id) as del_response:
@@ -286,7 +293,6 @@ async def clear_postuplenie():
 
 
 async def send_postuplenie_items(docid):
-    # docid = '18ORA-E633456'
     query = (
         select(SMSpecor.ARTICLE,
                SMSpecor.SPECITEM,
@@ -306,16 +312,14 @@ async def send_postuplenie_items(docid):
     for result in results:
         spec_items = DocumentItem(
             uid=str(result['SPECITEM']),
-            # createdBy='SuperMag',
             productId=result['ARTICLE'],
             declaredQuantity=result['QUANTITY'],
             price=result['ITEMPRICE'],
             totalprice=result['TOTALPRICE'],
+            Price=result['ITEMPRICE'],
+            PriceTotal=result['TOTALPRICE']
         )
         spec_list.append(spec_items)
-        # spec_json = spec_items.model_dump_json(exclude_none=True)
-        # url = f'{postuplenie_url}({docid})/declaredItems'
-        # await send_request(url, spec_json)
     return spec_list
 
 
@@ -346,7 +350,8 @@ if __name__ == '__main__':
     # asyncio.run(load_card(article))
     # asyncio.run(get_articlelist())
     # asyncio.run(load_contragents())
-    asyncio.run(send_postuplenie('23ORA-E635484'))
+    asyncio.run(send_postuplenie('7ORA-E643252'))
     # asyncio.run(send_storeloc())
     # asyncio.run(clear_postuplenie())
     # asyncio.run(get_finalized_doc())
+    # asyncio.run(permitdel())

@@ -18,19 +18,19 @@ class DocumentItem(BaseModel):
     productBarcode: Optional[str] = Field(None, write_only=True)
     packingName: Optional[str] = Field(None, write_only=True)
     price: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
-    cenaPostavki: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    priceTotal: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
 
 
 class Postuplenie(BaseModel):
     id: str
-    name: str
+    name: Optional[str] = None
     appointment: Optional[str] = None
     userId: Optional[str] = None
     userName: Optional[str] = None
-    lastChangeDate: datetime
-    createDate: datetime
+    lastChangeDate: Optional[datetime] = None
+    createDate: Optional[datetime] = None
     createdOnPDA: Optional[bool] = None
-    documentTypeName: str
+    documentTypeName: str = 'Поступление'
     modified: Optional[bool] = None
     inProcess: Optional[bool] = None
     finished: Optional[bool] = None
@@ -44,7 +44,7 @@ class Postuplenie(BaseModel):
     deviceId: Optional[str] = None
     deviceName: Optional[str] = None
     deviceIP: Optional[str] = None
-    # licenseStatus: Optional[str] = None
     idKontragenta: Optional[str] = None
     declaredItems: Optional[list[DocumentItem]] = Field(None, read_only=True)
-    summadokumenta: Optional[float] = None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV
+    summaDokumenta: Optional[float] = None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV
+    PermitDel: bool = False
