@@ -25,7 +25,7 @@ class SMDOCOR(BaseModel):
     CROSSLOCATION: Optional[int] = None
     ORDERDATE: datetime
     OURSELFCLIENT: int
-    SUPPLYDATE: datetime
+    SUPPLYDATE: str | None = None
     SUPPLYTIME: int = Field(default=0)
     SUPPLYTIMETILL: int = Field(default=1439)
     USEFORAUTOGEN: str = Field(default="1")
@@ -66,10 +66,10 @@ class POSTOBJECT(BaseModel):
     OR: OR
 
 
-class PACKAGE(BaseModel):
+class Package(BaseModel):
     name: str
     POSTOBJECT: List[POSTOBJECT]
 
 
-class RootModel(BaseModel):
-    PACKAGE: PACKAGE
+class Data(BaseModel):
+    PACKAGE: Package

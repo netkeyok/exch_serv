@@ -278,8 +278,8 @@ async def clear_postuplenie():
             for data in data_list:
                 doclist = Postuplenie(**data)
                 if doclist.finished and doclist.PermitDel == True:
-                #     print(f'del {doclist.id}, {doclist.finished}')
-                # else:
+                    #     print(f'del {doclist.id}, {doclist.finished}')
+                    # else:
                     print(f'del {doclist.id}, {doclist.finished}')
                     del_url_with_id = f'{del_url}({doclist.id})'
                     async with sessionapi.delete(del_url_with_id) as del_response:

@@ -8,7 +8,6 @@ def parse_ui(doc_dict):
     # получаем список постобъектов
     postobjects = data.PACKAGE.POSTOBJECT
     article_list = []
-    doctest = ''
     # для каждого постобъекта получаем его описание, действие, идентификатор и документы
     for postobject in postobjects:
         description = postobject.description
@@ -179,7 +178,8 @@ def parse_wi(doc_dict):
 
 
 def parse_or(doc_dict):
-    data = OR.RootModel(**doc_dict)
+    print(doc_dict)
+    data = OR.Data(**doc_dict)
     # получаем список постобъектов
     postobjects = data.PACKAGE.POSTOBJECT
     doclist = []
