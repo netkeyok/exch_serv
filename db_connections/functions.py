@@ -1,6 +1,11 @@
-from sqlalchemy import func
+import asyncio
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import select, func, text
+
+from cv_models.Postuplenie import Postuplenie
+from db_connections.oramodels import SMDocuments, SADocDefaults, SMPostLocMap, SMPostQueue
 from db_connections.oracle_conf import session
-from db_connections.oramodels import SMDocuments, SADocDefaults
 
 
 def generate_number(mx_id):
@@ -25,3 +30,36 @@ def generate_number(mx_id):
     # собираем новый номер вместе с префиксом
     new_number = f'{location_prefix}{str(int_id).zfill(6)}'
     return new_number
+
+
+def mxid_to_postid(mx_id):
+    with session.begin():
+        post_id = (
+            session.query(SMPostLocMap.DBASEID).where(SMPostLocMap.STORELOC == mx_id).scalar())
+        resilt = post_id
+        print(resilt)
+
+
+def send_post(mx_id, doc_id):
+    with session.begin():
+        raw_sql = text("select supermag.SMPostQueueSeq.NEXTVAL from dual")
+        # current_datetime = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        # получаем префикс документа для заданного места хранения
+        post_id = (
+            session.query(SMPostLocMap.DBASEID).where(SMPostLocMap.STORELOC == mx_id).scalar())
+        # post_id = int(select(SMPostLocMap.DBASEID).where(SMPostLocMap.STORELOC == mx_id).as_scalar())
+        # Получаем последний номер существующего документа
+        new_post = SMPostQueue(
+            ENQTIME=datetime.now(),
+            ENQSEQ=int(session.execute(raw_sql).scalar()),
+            TARGET=post_id,
+            OBJTYPE='WI',
+            OBJID=doc_id)
+        session.add(new_post)
+        session.commit()
+
+        # Закрытие сессии
+        session.close()
+
+
+mxid_to_postid(17)

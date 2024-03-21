@@ -1,11 +1,12 @@
 import asyncio
 import aiohttp
 import json
+import xml.etree.ElementTree as ET
 from sm_api_models.WI import Data, Package, Item, WI, SMDocuments
 from sm_api_models.WI import SMCommonbases, SMWaybillIn, SMSpec, SLSpecqmismatch
-from Send_to_CV import send_request, permitdel
+from Send_to_CV import send_request, permitdel, read_request_sm
 from cv_models.Postuplenie import Postuplenie, DocumentItem
-from db_connections.functions import generate_number
+from db_connections.functions import generate_number, send_post
 
 header = {'Content-Type': 'application/json'}
 
@@ -24,10 +25,12 @@ async def send_wi():
             for data in data_list:
                 doclist = Postuplenie(**data)
                 if doclist.finished:
+                    print(doclist)
                     cv_date = doclist.createDate
                     formatted_date = cv_date.strftime("%Y-%m-%dT%H:%M:%S")
                     wi_id = generate_number(doclist.warehouseId)
                     items = await get_wi_items(doclist.id, wi_id)
+                    print(wi_id, doclist.id)
                     # Создаем экземпляр модели
                     wi_data = Data(
                         PACKAGE=Package(
@@ -49,7 +52,7 @@ async def send_wi():
                                                 CURRENCYMULTORDER=0,
                                                 CURRENCYRATE=1.0,
                                                 CURRENCYTYPE=1,
-                                                DOCSTATE=2,
+                                                DOCSTATE=1,
                                                 ISROUBLES="1",
                                                 LOCATIONTO=doclist.warehouseId,
                                                 OPCODE="0",
@@ -93,18 +96,22 @@ async def send_wi():
                     cm_url = 'http://192.168.0.238:8080/in/json'
 
                     # print(data_json)
-                    await send_request(cm_url, data_json)
-
-
-
-                # else:
-                #     print(f'del {doclist.id}, {doclist.finished}')
-            # print(status)
-            # Проверяем статус ответа и выводим результат
-            if status not in (200,):
-                print('Произошла ошибка при запросе на сервер')
-                print(status)
-                print(response)
+                    text = await send_request(cm_url, data_json)
+                    if text:
+                        ticket = ET.fromstring(text)
+                        ticket_id = ticket.find('ticketId').text
+                        print(ticket_id)
+                        while True:
+                            state = 'Handling'
+                            request_text = await read_request_sm(ticket_id)
+                            print(request_text)
+                            states = ET.fromstring(request_text)
+                            state = states.find('state').text
+                            if state == 'Success':
+                                send_post(doclist.warehouseId, wi_id)
+                                break
+                            elif state not in ('Success', 'Handling', 'Queued'):
+                                raise ValueError(f"Документ не обработан статус: {state}")
 
 
 async def get_wi_items(or_id, wi_id):
@@ -116,7 +123,6 @@ async def get_wi_items(or_id, wi_id):
             status = response.status
             data_js = await response.json()
             data_list = data_js['value']
-            print(data_list)
             specitem = 0
             smspeclist = []
             mismathlist = []
@@ -151,7 +157,10 @@ async def get_wi_items(or_id, wi_id):
     return smspeclist, mismathlist
 
 
+
+
 if __name__ == '__main__':
     # asyncio.run(send_request(url, data_json))
     # asyncio.run(get_wi_items('23ORA-NV96456'))
     asyncio.run(send_wi())
+

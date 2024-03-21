@@ -1,5 +1,7 @@
 import datetime
-from sqlalchemy import MetaData, Column, Integer, String, ForeignKey, DateTime, Float
+from sqlalchemy import MetaData, Column, Integer, String, ForeignKey, Float, Date, Sequence
+from sqlalchemy.sql import func
+from sqlalchemy.types import DateTime
 from sqlalchemy.orm import declarative_base, relationship
 
 #Определяем схему в базе Oracle, чтобы пользователь не supermag выполнял запросы.
@@ -197,3 +199,24 @@ class SMSpecor(Base):
     TOTALPRICE = Column(Float)
     ITEMPRICECUR = Column(Float)
     TOTALPRICECUR = Column(Float)
+
+class SMPostQueue(Base):
+    __tablename__ = 'SMPOSTQUEUE'
+
+    ENQTIME = Column(Date, default=func.current_date(), nullable=False)
+    #ENQTIME = Column(DateTime, nullable=False, default=func.now())
+    ENQSEQ = Column(Integer, primary_key=True, nullable=False)
+    TARGET = Column(Integer)
+    OBJTYPE = Column(String(2), nullable=False)
+    OBJID = Column(String(150), nullable=False)
+    PARAMINT = Column(Integer)
+    PARAMSTR = Column(String(4000))
+    TRANSFLAGS = Column(Integer, nullable=False, default=0)
+    COMMENTARY = Column(String(255))
+
+
+class SMPostLocMap(Base):
+    __tablename__ = 'SMPOSTLOCMAP'
+
+    STORELOC = Column(Integer, primary_key=True)
+    DBASEID = Column(Integer)

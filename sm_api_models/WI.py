@@ -121,7 +121,7 @@ class SLSpecqmismatch(BaseModel):
     DOCTYPE: str
     SPECITEM: int
     # ARTICLE: str | None = None
-    QUANTBYDOC: int
+    QUANTBYDOC: float
     REASON: str | None = None
     REASON2: str | None = None
 

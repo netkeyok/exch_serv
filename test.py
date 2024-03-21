@@ -1,43 +1,30 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import update, select, func, text
 
 from cv_models.Postuplenie import Postuplenie
-from db_connections.oramodels import SMDocuments
-from db_connections.oracle_conf import session
+from db_connections.oramodels import SMDocuments, SADocDefaults, SMPostLocMap, SMPostQueue
+from db_connections.oracle_conf import session, engine
+
+# post_id = select(SMPostLocMap.DBASEID).where(SMPostLocMap.STORELOC == 17)
+# post_id = session.query(func.select SMPostQueueSeq.NEXTVAL from dual)
 
 
-async def send_postuplenie(docid=None):
-    print(f"send postuplenie {docid}")
+# Выполняем запрос
+# text = session.execute(post_id).scalar()
+# print(text)
 
-    query = (
-        select(SMDocuments.ID,
-               SMDocuments.LOCATION,
-               SMDocuments.CREATEDAT,
-               SMDocuments.CLIENTINDEX,
-               SMDocuments.TOTALSUM)
-        .where(SMDocuments.ID == docid)
-    )
+raw_sql = text("select supermag.SMPostQueueSeq.NEXTVAL from dual")
 
-    data = session.execute(query).fetchall()
-    print(f'!!!!!!!{data}')
-    result = session.execute(query)
-    print(result)
-    dict_iterator = result.mappings()
+# Выполнение запроса
+result = session.execute(raw_sql).scalar()
 
-    # Получаем список словарей
-    results = list(dict_iterator)
-    print(results)
+print(result)
+# Обработка результатов
+# for row in result:
+#     print(row)
+# result = session.execute(raw_sql)
 
-
-
-if __name__ == '__main__':
-    # asyncio.run(load_card(article))
-    # asyncio.run(get_articlelist())
-    # asyncio.run(load_contragents())
-    asyncio.run(send_postuplenie('2ORA-E643481'))
-    # asyncio.run(send_storeloc())
-    # asyncio.run(clear_postuplenie())
-    # asyncio.run(get_finalized_doc())
-    # asyncio.run(permitdel())
+# Завершаем транзакцию
+# session.commit()

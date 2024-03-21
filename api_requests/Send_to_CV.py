@@ -19,24 +19,41 @@ from config import postuplenie_url, warehouse_url
 header = {'Content-Type': 'application/json'}
 
 
-# Создаем асинхронную функцию для отправки запроса на сервер api
 async def send_request(url, js_data):
+    # асинхронная функция для отправки запроса на сервер api
+
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
         async with sessionapi.post(url, data=js_data, headers=header) as response:
             # Получаем статус и текст ответа
             status = response.status
-            # text = await response.text()
+            text = await response.text()
             # Проверяем статус ответа и выводим результат
             if status not in (200, 201, 204):
                 print(js_data)
                 print('Произошла ошибка при добавлении продукта на сервер')
                 print(status)
                 print(response)
+    return text
+
+
+async def read_request_sm(ticket):
+    # Чтение статуса загрузки накладной в СМ
+    url = f"http://192.168.0.238:8080/out/ticket/{ticket}"
+    text = ''
+    async with aiohttp.ClientSession() as sessionapi:
+        # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
+        async with sessionapi.get(url, headers=header) as response:
+            status = response.status
+            if status == 200:
+                text = await response.text()
+    return text
 
 
 async def load_card(article):
+    # Загрузка карточки на сервер Клеверенс
+
     # Получаем данные из базы
     full_request = select(
         SMCard.article,
@@ -113,13 +130,15 @@ async def load_card(article):
 
     # Конвертируем объект в JSON-формат
     product_json = product.model_dump_json(exclude_none=True)
-    with open('../product_json.json', 'w') as file:
-        json.dump(product_json, file)
+    # with open('../product_json.json', 'w') as file:
+    #     json.dump(product_json, file)
     # Отправляем данные на сервер.
     await send_request(products_url, product_json)
 
 
 async def load_contragents():
+    # Загрузка справочника контрагентов в Клеверенс
+
     await send_request(begin_contragent, None)
     query = select(SMClientInfo.id,
                    SMClientInfo.name,
@@ -151,6 +170,7 @@ async def load_contragents():
 
 
 async def get_articlelist():
+    # Загрузка справочника товаров в Клеверенс
     start_time = time.time()
 
     print('Начало загрузки данных')
@@ -178,6 +198,9 @@ async def get_articlelist():
 
 # Отправка документов на сервер.
 async def send_postuplenie(docid=None):
+    # Загрузка документов поступление в Клеверенс, если ну установлен номер документа, грузятся все документы,
+    # которые соотвествуют условию отбора
+
     # Фильтр по дате, при загрузке всех документов.
     days_ago = datetime.now() - timedelta(days=2)
     # Если указан номер документа, то грузим строго по номеру. Номер получаем по API от СМ.
@@ -221,7 +244,7 @@ async def send_postuplenie(docid=None):
             createDate=formatted_datetime_with_timezone,
             warehouseId=str(result['LOCATION']),
             idKontragenta=str(result['CLIENTINDEX']),
-            SummaDokumenta=result['TOTALSUM'],
+            summaDokumenta=result['TOTALSUM'],
             declaredItems=items
         )
         postuplenie_json = doc.model_dump_json(exclude_none=True)
@@ -230,6 +253,7 @@ async def send_postuplenie(docid=None):
 
 
 async def permitdel(docid):
+    # Установка атрибута PermitDel для разрешения удаления документа с сервера
     doc = Postuplenie(
         id=docid,
         PermitDel=True
@@ -241,6 +265,7 @@ async def permitdel(docid):
 
 
 async def send_storeloc():
+    # Загрузка справочников мест хранения в Клеверенс
     query = (
         select(SMStoreLocations.ID,
                SMStoreLocations.NAME,
@@ -265,6 +290,8 @@ async def send_storeloc():
 
 
 async def clear_postuplenie():
+    # Очистка документов поступления, разрешенных для удаления
+
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
     url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
     del_url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
@@ -293,6 +320,7 @@ async def clear_postuplenie():
 
 
 async def send_postuplenie_items(docid):
+    # Формирование списка позиций накладной
     query = (
         select(SMSpecor.ARTICLE,
                SMSpecor.SPECITEM,
@@ -315,15 +343,14 @@ async def send_postuplenie_items(docid):
             productId=result['ARTICLE'],
             declaredQuantity=result['QUANTITY'],
             price=result['ITEMPRICE'],
-            totalprice=result['TOTALPRICE'],
-            Price=result['ITEMPRICE'],
-            PriceTotal=result['TOTALPRICE']
+            priceTotal=result['TOTALPRICE']
         )
         spec_list.append(spec_items)
     return spec_list
 
 
 async def get_finalized_doc():
+    # Получить список документов завершенных на ТСД
     url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
     url_items = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
     async with aiohttp.ClientSession() as sessionapi:
@@ -350,8 +377,9 @@ if __name__ == '__main__':
     # asyncio.run(load_card(article))
     # asyncio.run(get_articlelist())
     # asyncio.run(load_contragents())
-    asyncio.run(send_postuplenie('7ORA-E643252'))
-    # asyncio.run(send_storeloc())
+    # asyncio.run(send_postuplenie('7ORA-E643252'))
+    asyncio.run(send_storeloc())
     # asyncio.run(clear_postuplenie())
     # asyncio.run(get_finalized_doc())
     # asyncio.run(permitdel())
+    # asyncio.run(read_request_sm('23fa886b-4aea-4b12-a697-9e6cb8d0f7df'))
