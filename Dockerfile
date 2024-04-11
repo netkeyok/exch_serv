@@ -3,8 +3,6 @@ FROM ghcr.io/oracle/oraclelinux8-python:3.11-amd64
 
 ENV PYTHONUNBUFFERED=1
 
-RUN apk update
-
 
 # Установка SQLAlchemy и pyodbc, копирование файлов проекта и установка зависимостей
 COPY . .

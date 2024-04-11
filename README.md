@@ -28,3 +28,8 @@ ORACLE_BASE=Название базы данных
 ![img.png](doc/img3.png)
 Нажать редактировать и добавить поле суммы документа:
 ![img.png](doc/img4.png)
+
+
+Запуск контейнера при помощи команды:
+docker build . --tag exch_server --no-cache && docker run --name exch_server -p 8083:8083 --env
+-file ./.env exch_server
