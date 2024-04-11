@@ -12,4 +12,4 @@ RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
 # Команды, выполняемые при запуске контейнера
-CMD ["python3", "-m", "uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8081"]
+CMD ["python3", "-m", "uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8083"]
