@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y libaio1 wget unzip \
 RUN wget https://download.oracle.com/otn_software/linux/instantclient/19800/instantclient-basiclite-linux.x64-19.8.0.0.0dbru.zip \
 && unzip instantclient-basiclite-linux.x64-19.8.0.0.0dbru.zip -d /opt/oracle \
 && rm -f instantclient-basiclite-linux.x64-19.8.0.0.0dbru.zip \
-&& ln -s $ORACLE_HOME/libclntsh.so.19.1 $ORACLE_HOME/libclntsh.so \
-&& ln -s $ORACLE_HOME/libocci.so.19.1 $ORACLE_HOME/libocci.so
+&& ln -sf $ORACLE_HOME/libclntsh.so.19.1 $ORACLE_HOME/libclntsh.so \
+&& ln -sf $ORACLE_HOME/libocci.so.19.1 $ORACLE_HOME/libocci.so
 
 
 # Копирование файлов проекта и установка зависимостей Python
