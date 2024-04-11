@@ -1,0 +1,474 @@
+﻿{
+  "$schema": "http://json-schema.org/schema#",
+  "title": "OR, Export",
+  "description": "Заказ поставщику",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "PACKAGE": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "POSTOBJECT": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "action": {
+                "type": "string"
+              },
+              "Id": {
+                "type": "string"
+              },
+              "OR": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "SMDOCUMENTS": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "ID": {
+                          "type": "string"
+                        },
+                        "DOCTYPE": {
+                          "type": "string"
+                        },
+                        "BORNIN": {
+                          "type": "string"
+                        },
+                        "CLIENTINDEX": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "COMMENTARY": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "CREATEDAT": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "CURRENCYMULTORDER": {
+                          "type": "integer",
+                          "default": 0
+                        },
+                        "CURRENCYRATE": {
+                          "type": "number"
+                        },
+                        "CURRENCYTYPE": {
+                          "type": "integer"
+                        },
+                        "DOCSTATE": {
+                          "type": "integer"
+                        },
+                        "ISROUBLES": {
+                          "type": "string",
+                          "default": "1"
+                        },
+                        "LOCATION": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "LOCATIONFROM": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "LOCATIONTO": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "OPCODE": {
+                          "type": "integer"
+                        },
+                        "PRICEROUNDMODE": {
+                          "type": "integer"
+                        },
+                        "TOTALSUM": {
+                          "type": "number"
+                        },
+                        "TOTALSUMCUR": {
+                          "type": "number"
+                        },
+                        "USEROP": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "ID",
+                        "DOCTYPE",
+                        "BORNIN",
+                        "CREATEDAT",
+                        "CURRENCYRATE",
+                        "CURRENCYTYPE",
+                        "DOCSTATE",
+                        "OPCODE",
+                        "PRICEROUNDMODE",
+                        "TOTALSUM",
+                        "TOTALSUMCUR"
+                      ]
+                    }
+                  },
+                  "SMCOMMONBASES": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "ID": {
+                          "type": "string"
+                        },
+                        "DOCTYPE": {
+                          "type": "string"
+                        },
+                        "BASEDOCTYPE": {
+                          "type": "string"
+                        },
+                        "BASEID": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "ID",
+                        "DOCTYPE",
+                        "BASEDOCTYPE",
+                        "BASEID"
+                      ]
+                    }
+                  },
+                  "SMDOCPROPS": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "DOCID": {
+                          "type": "string"
+                        },
+                        "DOCTYPE": {
+                          "type": "string"
+                        },
+                        "PARAMNAME": {
+                          "type": "string"
+                        },
+                        "PARAMVALUE": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "DOCID",
+                        "DOCTYPE",
+                        "PARAMNAME",
+                        "PARAMVALUE"
+                      ]
+                    }
+                  },
+                  "SMDOCBLOBFILES": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "ID": {
+                          "type": "string"
+                        },
+                        "DOCTYPE": {
+                          "type": "string"
+                        },
+                        "INSERTIONID": {
+                          "type": "integer"
+                        },
+                        "FILENAME": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "INSERTEDTYPEID": {
+                          "type": "integer"
+                        },
+                        "THECONTENTS": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "TITLE": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "ID",
+                        "DOCTYPE",
+                        "INSERTIONID",
+                        "INSERTEDTYPEID"
+                      ]
+                    }
+                  },
+                  "SMDOCOR": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "ID": {
+                          "type": "string"
+                        },
+                        "DOCTYPE": {
+                          "type": "string",
+                          "default": "OR"
+                        },
+                        "CLIENTCOMMENTARY": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "COMMENTARY": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "CROSSLOCATION": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "ORDERDATE": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "OURSELFCLIENT": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "SUPPLYDATE": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "SUPPLYTIME": {
+                          "type": "integer",
+                          "default": 0
+                        },
+                        "SUPPLYTIMETILL": {
+                          "type": "integer",
+                          "default": 1439
+                        },
+                        "USEFORAUTOGEN": {
+                          "type": "string",
+                          "default": "1"
+                        }
+                      },
+                      "required": [
+                        "ID"
+                      ]
+                    }
+                  },
+                  "SMSPECOR": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "DOCID": {
+                          "type": "string"
+                        },
+                        "DOCTYPE": {
+                          "type": "string"
+                        },
+                        "SPECITEM": {
+                          "type": "integer"
+                        },
+                        "ARTICLE": {
+                          "type": "string"
+                        },
+                        "DISPLAYITEM": {
+                          "type": "integer"
+                        },
+                        "ITEMPRICE": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "ITEMPRICECUR": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "QUANTITY": {
+                          "type": "number"
+                        },
+                        "SUGGESTQUANTITY": {
+                          "type": "number",
+                          "default": 0.0
+                        },
+                        "TOTALPRICE": {
+                          "type": "number"
+                        },
+                        "TOTALPRICECUR": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "DOCID",
+                        "DOCTYPE",
+                        "SPECITEM",
+                        "ARTICLE",
+                        "DISPLAYITEM",
+                        "QUANTITY",
+                        "TOTALPRICE",
+                        "TOTALPRICECUR"
+                      ]
+                    }
+                  },
+                  "SMSPECSCALEOR": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "DOCID": {
+                          "type": "string"
+                        },
+                        "DOCTYPE": {
+                          "type": "string"
+                        },
+                        "SPECITEM": {
+                          "type": "integer"
+                        },
+                        "SUBARTICLE": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "QUANTITY": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "DOCID",
+                        "DOCTYPE",
+                        "SPECITEM",
+                        "QUANTITY"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

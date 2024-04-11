@@ -1,7 +1,8 @@
 from fastapi import FastAPI, File
 import json
 from cm_datamining import parse_ui, parse_wi, parse_rl, parse_or
-from api_requests.Send_to_CV import send_postuplenie
+from api_requests.Send_to_CV import send_postuplenie, clear_postuplenie
+from api_requests.Send_to_SM import send_wi
 
 
 app = FastAPI()
@@ -30,11 +31,18 @@ async def upload_data(file: bytes = File()):
     elif 'OR' in docdict[0].keys():
         print('start receiving OR')
         doclist = parse_or(dictionary)
-        for doc in doclist:
-            await send_postuplenie(doc)
+        for docid in doclist:
+            await send_postuplenie(docid)
+            print(docid)
         print('end receiving OR')
     else:
         print('---------------------------------------')
         print(docdict[0].keys())
         print('wrong data!!!')
         print(docdict)
+
+
+@app.post("/v1/func")
+async def clear_docs(swith):
+    await clear_postuplenie(swith)
+    return 'Ok'

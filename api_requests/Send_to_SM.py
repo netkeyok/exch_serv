@@ -1,10 +1,12 @@
 import asyncio
+import time
+
 import aiohttp
 import json
 import xml.etree.ElementTree as ET
 from sm_api_models.WI import Data, Package, Item, WI, SMDocuments
 from sm_api_models.WI import SMCommonbases, SMWaybillIn, SMSpec, SLSpecqmismatch
-from Send_to_CV import send_request, permitdel, read_request_sm
+from api_requests.Send_to_CV import send_request, permitdel, read_request_sm
 from cv_models.Postuplenie import Postuplenie, DocumentItem
 from db_connections.functions import generate_number, send_post
 
@@ -12,6 +14,7 @@ header = {'Content-Type': 'application/json'}
 
 
 async def send_wi():
+    print("Start sending WI")
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
     url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
 
@@ -100,15 +103,15 @@ async def send_wi():
                     if text:
                         ticket = ET.fromstring(text)
                         ticket_id = ticket.find('ticketId').text
-                        print(ticket_id)
                         while True:
                             state = 'Handling'
                             request_text = await read_request_sm(ticket_id)
-                            print(request_text)
+                            time.sleep(0.5)
                             states = ET.fromstring(request_text)
                             state = states.find('state').text
                             if state == 'Success':
                                 send_post(doclist.warehouseId, wi_id)
+                                await permitdel(doclist.id)
                                 break
                             elif state not in ('Success', 'Handling', 'Queued'):
                                 raise ValueError(f"Документ не обработан статус: {state}")

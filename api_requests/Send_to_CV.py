@@ -248,7 +248,7 @@ async def send_postuplenie(docid=None):
             declaredItems=items
         )
         postuplenie_json = doc.model_dump_json(exclude_none=True)
-        print(postuplenie_json)
+        # print(postuplenie_json)
         await send_request(postuplenie_url, postuplenie_json)
 
 
@@ -289,7 +289,7 @@ async def send_storeloc():
         await send_request(warehouse_url, warehouse_json)
 
 
-async def clear_postuplenie():
+async def clear_postuplenie(swith=None):
     # Очистка документов поступления, разрешенных для удаления
 
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
@@ -304,14 +304,19 @@ async def clear_postuplenie():
             data_list = data_js['value']
             for data in data_list:
                 doclist = Postuplenie(**data)
-                if doclist.finished and doclist.PermitDel == True:
-                    #     print(f'del {doclist.id}, {doclist.finished}')
-                    # else:
+                if swith:
                     print(f'del {doclist.id}, {doclist.finished}')
                     del_url_with_id = f'{del_url}({doclist.id})'
                     async with sessionapi.delete(del_url_with_id) as del_response:
                         print(del_response.status)
-            # print(status)
+                else:
+                    if doclist.finished and doclist.PermitDel == True:
+                        #     print(f'del {doclist.id}, {doclist.finished}')
+                        # else:
+                        print(f'del {doclist.id}, {doclist.finished}')
+                        del_url_with_id = f'{del_url}({doclist.id})'
+                        async with sessionapi.delete(del_url_with_id) as del_response:
+                            print(del_response.status)
             # Проверяем статус ответа и выводим результат
             if status not in (200,):
                 print('Произошла ошибка при запросе на сервер')
@@ -378,8 +383,9 @@ if __name__ == '__main__':
     # asyncio.run(get_articlelist())
     # asyncio.run(load_contragents())
     # asyncio.run(send_postuplenie('7ORA-E643252'))
-    asyncio.run(send_storeloc())
-    # asyncio.run(clear_postuplenie())
+    # asyncio.run(send_storeloc())
+    # asyncio.run(clear_postuplenie(1))
     # asyncio.run(get_finalized_doc())
     # asyncio.run(permitdel())
     # asyncio.run(read_request_sm('23fa886b-4aea-4b12-a697-9e6cb8d0f7df'))
+    pass

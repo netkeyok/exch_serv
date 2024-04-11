@@ -178,7 +178,7 @@ def parse_wi(doc_dict):
 
 
 def parse_or(doc_dict):
-    print(doc_dict)
+    # print(doc_dict)
     data = OR.Data(**doc_dict)
     # получаем список постобъектов
     postobjects = data.PACKAGE.POSTOBJECT

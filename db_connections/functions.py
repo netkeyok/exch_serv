@@ -60,6 +60,3 @@ def send_post(mx_id, doc_id):
 
         # Закрытие сессии
         session.close()
-
-
-mxid_to_postid(17)
