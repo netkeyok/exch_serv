@@ -1,18 +1,5 @@
 # Используем официальный базовый образ Oracle Linux 8
-FROM oraclelinux:8
-
-# Установка Oracle Instant Client
-RUN dnf -y install oracle-release-el8 && \
-dnf -y install oracle-instantclient19.21-basic oracle-instantclient19.21-devel && \
-dnf -y install gcc python3-devel && \
-dnf clean all
-
-# Установка Python 3.11
-RUN dnf -y module enable python311 && \
-dnf -y install python311 && \
-alternatives --set python /usr/bin/python3.11 && \
-python3.11 -m ensurepip && \
-python3.11 -m pip install --upgrade pip
+FROM ghcr.io/oracle/oraclelinux8-python:3.11-amd64
 
 # Установка переменных окружения для Oracle Instant Client
 ENV ORACLE_HOME=/usr/lib/oracle/19.21/client64
