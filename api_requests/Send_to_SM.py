@@ -160,10 +160,7 @@ async def get_wi_items(or_id, wi_id):
     return smspeclist, mismathlist
 
 
-
-
 if __name__ == '__main__':
     # asyncio.run(send_request(url, data_json))
     # asyncio.run(get_wi_items('23ORA-NV96456'))
     asyncio.run(send_wi())
-

@@ -107,6 +107,17 @@ class SMStoreUnits(Base):
     card = relationship("SMCard", back_populates="store_units")
 
 
+class SACardClass(Base):
+    __tablename__ = 'SACARDCLASS'
+
+    id = Column(Integer, primary_key=True, nullable=False, default=-1)
+    tree = Column(String(100), nullable=False)
+    name = Column(String(255), nullable=False)
+    flags = Column(Integer, nullable=False, default=0)
+    creator = Column(Integer, nullable=False, default=-2)
+    normtree = Column(String(80), nullable=False)
+
+
 class SMClientInfo(Base):
     __tablename__ = 'SMCLIENTINFO'
 
