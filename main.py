@@ -50,7 +50,7 @@ async def clear_docs(swith):
     return 'Ok'
 
 
-@app.post("/v1/get_card")
+@app.get("/v1/get_card")
 async def get_SMcard(bar: str):
     result = get_card(bar)
     # Предполагаем, что result - это список кортежей
