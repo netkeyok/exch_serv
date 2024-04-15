@@ -6,7 +6,7 @@ FROM ghcr.io/oracle/oraclelinux:8
 ARG release=19
 ARG update=21
 
-RUN RUN dnf -y install python3.11 python3.11-pip python3.11-setuptools python3.11-wheel && \
+RUN dnf -y install python3.11 python3.11-pip python3.11-setuptools python3.11-wheel && \
      dnf -y install oracle-release-el8 && \
      dnf -y install oracle-instantclient${release}.${update}-basic oracle-instantclient${release}.${update}-devel oracle-instantclient${release}.${update}-sqlplus && \
      dnf -y install epel-release && \
