@@ -31,4 +31,4 @@ RUN chmod 644 /supervisord.conf
 
 # Команды, выполняемые при запуске контейнера
 #CMD ["supervisord", "-c", "supervisord.conf"]
-CMD ["/bin/python3", "-V"]
+CMD ["/bin/python3.11", "-V"]
