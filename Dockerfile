@@ -24,11 +24,10 @@ ENV FLOWER_TIMEZONE=Asia/Yekaterinburg
 # Копирование файлов проекта в контейнер
 COPY . .
 
-# RUN python3 -m pip install --upgrade pip \
-#     && pip3 install --user -r requirements.txt
+RUN python3.11 -m pip install --upgrade pip \
+    && pip3 install --user -r requirements.txt
 
 RUN chmod 644 /supervisord.conf
 
 # Команды, выполняемые при запуске контейнера
-#CMD ["supervisord", "-c", "supervisord.conf"]
-CMD ["/bin/python3.11", "-V"]
+CMD ["supervisord", "-c", "supervisord.conf"]
