@@ -21,8 +21,11 @@ ENV FLOWER_TIMEZONE=Asia/Yekaterinburg
 # Копирование файлов проекта в контейнер
 COPY . .
 
-RUN python3 -m pip install --upgrade --no-cache-dir pip \
-    && pip3 install --user -r requirements.txt
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+&& python3 get-pip.py \
+&& rm -f get-pip.py
+
+RUN pip3 install --user -r requirements.txt
 
 RUN chmod 644 /supervisord.conf
 
