@@ -6,6 +6,7 @@ ARG update=21
 
 RUN  dnf -y install oracle-release-el8 && \
      dnf -y install oracle-instantclient${release}.${update}-basic oracle-instantclient${release}.${update}-devel oracle-instantclient${release}.${update}-sqlplus && \
+     dnf -y install supervisor && \
      rm -rf /var/cache/dnf
 
 # Установка переменных окружения для Oracle Instant Client
@@ -13,6 +14,7 @@ RUN  dnf -y install oracle-release-el8 && \
 ENV ORACLE_HOME=/usr/lib/oracle/19.21/client64
 ENV LD_LIBRARY_PATH=$ORACLE_HOME/lib
 ENV PATH=$PATH:$ORACLE_HOME/bin
+ENV FLOWER_TIMEZONE=Asia/Yekaterinburg
 
 
 # Копирование файлов проекта в контейнер
