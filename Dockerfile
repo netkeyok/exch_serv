@@ -30,4 +30,5 @@ RUN python3 -m pip install --upgrade pip \
 RUN chmod 644 /supervisord.conf
 
 # Команды, выполняемые при запуске контейнера
-CMD ["supervisord", "-c", "supervisord.conf"]
+#CMD ["supervisord", "-c", "supervisord.conf"]
+CMD ["/bin/python3", "-V"]
