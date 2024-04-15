@@ -6,7 +6,7 @@ ARG update=21
 
 RUN  dnf -y install oracle-release-el8 && \
      dnf -y install oracle-instantclient${release}.${update}-basic oracle-instantclient${release}.${update}-devel oracle-instantclient${release}.${update}-sqlplus && \
-     dnf -y install epel-release
+     dnf -y install epel-release && \
      dnf -y install supervisor && \
      rm -rf /var/cache/dnf
 
