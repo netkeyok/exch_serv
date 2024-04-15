@@ -20,9 +20,8 @@ async def send_wi():
 
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
+        result = 'Nothing to send'
         async with sessionapi.get(url, headers=header) as response:
-            # Получаем кодировку, статус и текст ответа асинхронно с помощью await
-            status = response.status
             data_js = await response.json()
             data_list = data_js['value']
             for data in data_list:
@@ -112,9 +111,12 @@ async def send_wi():
                             if state == 'Success':
                                 send_post(doclist.warehouseId, wi_id)
                                 await permitdel(doclist.id)
+                                result = f'send doc {wi_id}'
                                 break
                             elif state not in ('Success', 'Handling', 'Queued'):
+                                result = f"Документ не обработан статус: {state}"
                                 raise ValueError(f"Документ не обработан статус: {state}")
+    return result
 
 
 async def get_wi_items(or_id, wi_id):

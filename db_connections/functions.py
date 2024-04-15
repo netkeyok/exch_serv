@@ -5,7 +5,7 @@ from sqlalchemy import select, func, text
 
 from cv_models.Postuplenie import Postuplenie
 from db_connections.oramodels import SMDocuments, SADocDefaults, SMPostLocMap, SMPostQueue
-from db_connections.oracle_conf import session
+from db_connections.db_conf import session
 
 
 def generate_number(mx_id):

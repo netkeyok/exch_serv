@@ -21,5 +21,7 @@ COPY . .
 RUN pip3 install --upgrade pip \
     && pip3 install -r requirements.txt
 
+RUN chmod 644 /supervisord.conf
+
 # Команды, выполняемые при запуске контейнера
-CMD ["python3", "-m", "uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8083"]
+CMD ["supervisord", "-c", "supervisord.conf"]

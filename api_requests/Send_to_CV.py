@@ -12,7 +12,7 @@ from cv_models.Contragents import Contragent
 from cv_models.Postuplenie import Postuplenie, DocumentItem
 from cv_models.Warehouse import Warehouse
 from db_connections.oramodels import SMStoreUnits, SMCard, SMClientInfo, SMDocuments, SMStoreLocations, SMSpecor
-from db_connections.oracle_conf import session
+from db_connections.db_conf import session
 from config import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent
 from config import postuplenie_url, warehouse_url
 

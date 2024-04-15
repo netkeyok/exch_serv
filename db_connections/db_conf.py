@@ -20,3 +20,7 @@ url = f"oracle+oracledb://{ORACLE_USER}:{ORACLE_PASS}@{ORACLE_HOST}:{ORACLE_PORT
 engine = create_engine(url=url, thick_mode=True)
 Session = sessionmaker(bind=engine)
 session = Session()
+
+
+REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_PASS = os.environ.get("REDIS_PASS")

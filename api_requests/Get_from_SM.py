@@ -1,7 +1,7 @@
 from select import select
 from sqlalchemy import select, and_, desc
 
-from db_connections.oracle_conf import session
+from db_connections.db_conf import session
 from db_connections.oramodels import SMCard, SMStoreUnits, SACardClass
 
 
