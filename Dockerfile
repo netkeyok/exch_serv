@@ -1,5 +1,7 @@
 # Используем официальный базовый образ Oracle Linux 8
 #FROM ghcr.io/oracle/oraclelinux8-python:3.11-amd64
+FROM ghcr.io/oracle/oraclelinux:8
+
 
 ARG release=19
 ARG update=21
