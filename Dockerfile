@@ -21,8 +21,8 @@ ENV FLOWER_TIMEZONE=Asia/Yekaterinburg
 # Копирование файлов проекта в контейнер
 COPY . .
 
-RUN pip3 install --upgrade pip \
-    && pip3 install -r requirements.txt
+RUN python3 -m pip install --upgrade pip \
+    && pip3 install --user -r requirements.txt
 
 RUN chmod 644 /supervisord.conf
 
