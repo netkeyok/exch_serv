@@ -89,8 +89,8 @@ class SMStoreUnits(Base):
     unitname = Column(String)
     # указываем, что article ссылается на article в таблице SMCARD
     article = Column(String, ForeignKey("SMCARD.article"))
-    quantity = Column(Integer)
-    facequantity = Column(Integer)
+    quantity = Column(Float)
+    facequantity = Column(Float)
     flags = Column(Integer)
     subarticle = Column(String)
     boxid = Column(String)

@@ -65,7 +65,6 @@ async def load_card(article):
     ).join(SMStoreUnits, SMCard.article == SMStoreUnits.article).where(
         SMStoreUnits.article == article).order_by(SMStoreUnits.unitname)
     result = session.execute(full_request)
-
     dict_iterator = result.mappings()
 
     # Получаем список словарей
@@ -130,8 +129,6 @@ async def load_card(article):
 
     # Конвертируем объект в JSON-формат
     product_json = product.model_dump_json(exclude_none=True)
-    # with open('../product_json.json', 'w') as file:
-    #     json.dump(product_json, file)
     # Отправляем данные на сервер.
     await send_request(products_url, product_json)
 
@@ -169,7 +166,7 @@ async def load_contragents():
     await send_request(end_contragent, None)
 
 
-async def get_articlelist():
+async def send_articles():
     # Загрузка справочника товаров в Клеверенс
     start_time = time.time()
 
@@ -182,9 +179,10 @@ async def get_articlelist():
                                          SMCard.accepted == '1',
                                          exists().where(SMCard.article == SMStoreUnits.article))
     cards = session.execute(query).fetchall()
-
+    counter = 0
     # отправляем данные на сервер
     for article in cards:
+        counter += 1
         await load_card(article[0])
     await send_request(end_product, None)
 
@@ -194,11 +192,12 @@ async def get_articlelist():
 
     print('Загрузка данных закончена')
     print(f'Время выполнения: {execution_time}')
+    return f'Загружено {counter} SKU'
 
 
 # Отправка документов на сервер.
 async def send_postuplenie(docid=None):
-    # Загрузка документов поступление в Клеверенс, если ну установлен номер документа, грузятся все документы,
+    # Загрузка документов поступление в Клеверенс, если не установлен номер документа, грузятся все документы,
     # которые соотвествуют условию отбора
 
     # Фильтр по дате, при загрузке всех документов.
@@ -379,8 +378,8 @@ async def get_finalized_doc():
 
 
 if __name__ == '__main__':
-    # asyncio.run(load_card(article))
-    # asyncio.run(get_articlelist())
+    # asyncio.run(load_card('014073'))
+    asyncio.run(send_articles())
     # asyncio.run(load_contragents())
     # asyncio.run(send_postuplenie('7ORA-E643252'))
     # asyncio.run(send_storeloc())
