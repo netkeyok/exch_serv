@@ -23,4 +23,6 @@ postuplenie_url = f'{baseURL}Docs/Postuplenie'
 # Раздел загрузки складов.(МХ в Супермаге)
 warehouse_url = f'{baseURL}Warehouses'
 
-test_endpoint = f'http://{api_server_ip}:8000/v1/json_in/test'
+ticket_url = f"http://192.168.0.238:8080/out/ticket/"
+
+# test_endpoint = f'http://{api_server_ip}:8000/v1/json_in/test'

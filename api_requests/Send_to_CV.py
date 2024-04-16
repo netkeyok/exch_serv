@@ -13,8 +13,9 @@ from cv_models.Postuplenie import Postuplenie, DocumentItem
 from cv_models.Warehouse import Warehouse
 from db_connections.oramodels import SMStoreUnits, SMCard, SMClientInfo, SMDocuments, SMStoreLocations, SMSpecor
 from db_connections.db_conf import session
-from config import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent
-from config import postuplenie_url, warehouse_url
+from config_urls import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent, \
+    ticket_url
+from config_urls import postuplenie_url, warehouse_url
 
 header = {'Content-Type': 'application/json'}
 
@@ -39,15 +40,34 @@ async def send_request(url, js_data):
 
 
 async def read_request_sm(ticket):
-    # Чтение статуса загрузки накладной в СМ
-    url = f"http://192.168.0.238:8080/out/ticket/{ticket}"
+    """
+    Read the status of a ticket in the SM system.
+
+    Args:
+        ticket (str): The ticket number.
+
+    Returns:
+        str: The response text.
+
+    Raises:
+        ValueError: If the ticket is invalid.
+    """
+    # Validate the ticket parameter
+    if not ticket:
+        raise ValueError("Invalid ticket")
+
+    url = f"{ticket_url}{ticket}"
     text = ''
-    async with aiohttp.ClientSession() as sessionapi:
-        # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
-        async with sessionapi.get(url, headers=header) as response:
-            status = response.status
-            if status == 200:
-                text = await response.text()
+    try:
+        async with aiohttp.ClientSession() as sessionapi:
+            async with sessionapi.get(url, headers=header) as response:
+                status = response.status
+                if status == 200:
+                    text = await response.text()
+                else:
+                    text = f"Request failed with status code {status}"
+    except Exception as e:
+        print(f"An error occurred during the HTTP request: {e}")
     return text
 
 
@@ -78,7 +98,7 @@ async def load_card(article):
     default_barcode = ''
 
     # Проверяем наличие кол-ва для упаковок в карточке (у весовых может отсутсвовать, поэтому отсекаем.)
-    if all(data['quantity'] for data in results):
+    if not any(data['quantity'] is None for data in results):
         # цикл по списку словарей
         for card in results:
             # добавление barcode в список по ключу unitname
@@ -292,11 +312,11 @@ async def clear_postuplenie(swith=None):
     # Очистка документов поступления, разрешенных для удаления
 
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
-    url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
-    del_url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
+    # url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
+    # del_url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
-        async with sessionapi.get(url, headers=header) as response:
+        async with sessionapi.get(postuplenie_url, headers=header) as response:
             # Получаем кодировку, статус и текст ответа асинхронно с помощью await
             status = response.status
             data_js = await response.json()
@@ -305,7 +325,7 @@ async def clear_postuplenie(swith=None):
                 doclist = Postuplenie(**data)
                 if swith:
                     print(f'del {doclist.id}, {doclist.finished}')
-                    del_url_with_id = f'{del_url}({doclist.id})'
+                    del_url_with_id = f'{postuplenie_url}({doclist.id})'
                     async with sessionapi.delete(del_url_with_id) as del_response:
                         print(del_response.status)
                 else:
@@ -313,7 +333,7 @@ async def clear_postuplenie(swith=None):
                         #     print(f'del {doclist.id}, {doclist.finished}')
                         # else:
                         print(f'del {doclist.id}, {doclist.finished}')
-                        del_url_with_id = f'{del_url}({doclist.id})'
+                        del_url_with_id = f'{postuplenie_url}({doclist.id})'
                         async with sessionapi.delete(del_url_with_id) as del_response:
                             print(del_response.status)
             # Проверяем статус ответа и выводим результат
@@ -355,11 +375,11 @@ async def send_postuplenie_items(docid):
 
 async def get_finalized_doc():
     # Получить список документов завершенных на ТСД
-    url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
-    url_items = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
+    # url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
+    # url_items = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
-        async with sessionapi.get(url, headers=header) as response:
+        async with sessionapi.get(postuplenie_url, headers=header) as response:
             # Получаем кодировку, статус и текст ответа асинхронно с помощью await
             status = response.status
             data_js = await response.json()
@@ -368,7 +388,7 @@ async def get_finalized_doc():
                 doclist = Postuplenie(**data)
                 if doclist.finished:
                     print(doclist.id, doclist.finished)
-                    print(f"{url_items}('{doclist.id}')/declaredItems")
+                    print(f"{postuplenie_url}('{doclist.id}')/declaredItems")
             print(status)
             # Проверяем статус ответа и выводим результат
             if status not in (200,):
