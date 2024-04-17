@@ -111,6 +111,7 @@ async def send_wi():
                             if state == 'Success':
                                 send_post(doclist.warehouseId, wi_id)
                                 result = f'send doc {wi_id}'
+                                await permitdel(doclist.id)
                                 break
                             elif state not in ('Success', 'Handling', 'Queued'):
                                 result = f"Документ не обработан статус: {state}"

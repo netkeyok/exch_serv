@@ -309,41 +309,45 @@ async def send_storeloc():
         await send_request(warehouse_url, warehouse_json)
 
 
-async def clear_postuplenie(day=1):
+async def clear_postuplenie(day=None, doc_id=None):
     gmt_plus_5 = timezone(timedelta(hours=5))
     current_time = datetime.now(gmt_plus_5)
     start_of_today = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-
     # Начало вчерашнего дня в UTC
     start_of_yesterday = start_of_today - timedelta(days=day)
-
     # Конец вчерашнего дня в UTC
     end_of_yesterday = start_of_today - timedelta(seconds=1)
-
-    # Очистка документов поступления, разрешенных для удаления
-
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
-    async with aiohttp.ClientSession() as sessionapi:
-        try:
-            # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
-            async with sessionapi.get(postuplenie_url, headers=header) as response:
-                # Получаем кодировку, статус и текст ответа асинхронно с помощью await
-                status = response.status
-                if status == 200:
-                    data_js = await response.json()
-                    data_list = data_js['value']
-                    for data in data_list:
-                        doclist = Postuplenie(**data)
-                        if start_of_yesterday <= doclist.lastChangeDate <= end_of_yesterday and doclist.finished == True:
-                            del_url_with_id = f'{postuplenie_url}({doclist.id})'
-                            async with sessionapi.delete(del_url_with_id) as del_response:
-                                print(del_response.status)
-                else:
-                    print('Произошла ошибка при запросе на сервер')
-                    print(status)
-                    print(response)
-        except Exception as e:
-            print(f'An error occurred: {e}')
+    if day:
+        async with aiohttp.ClientSession() as sessionapi:
+            try:
+                # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
+                async with sessionapi.get(postuplenie_url, headers=header) as response:
+                    # Получаем кодировку, статус и текст ответа асинхронно с помощью await
+                    status = response.status
+                    if status == 200:
+                        data_js = await response.json()
+                        data_list = data_js['value']
+                        for data in data_list:
+                            doclist = Postuplenie(**data)
+                            if start_of_yesterday <= doclist.lastChangeDate <= end_of_yesterday and doclist.finished == True:
+                                del_url_with_id = f'{postuplenie_url}({doclist.id})'
+                                async with sessionapi.delete(del_url_with_id) as del_response:
+                                    print(del_response.status)
+                    else:
+                        print('Произошла ошибка при запросе на сервер')
+                        print(status)
+                        print(response)
+            except Exception as e:
+                print(f'An error occurred: {e}')
+    else:
+        async with aiohttp.ClientSession() as sessionapi:
+            try:
+                del_url_with_id = f'{postuplenie_url}({doc_id})'
+                async with sessionapi.delete(del_url_with_id) as del_response:
+                    print(del_response.status)
+            except Exception as e:
+                print(f'An error occurred: {e}')
     await sessionapi.close()
 
 
