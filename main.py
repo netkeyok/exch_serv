@@ -44,8 +44,8 @@ async def upload_data(file: bytes = File()):
 
 
 @app.post("/v1/func/clear")
-async def clear_docs(swith=None):
-    await clear_postuplenie(swith)
+async def clear_docs(days):
+    await clear_postuplenie(days)
     return 'Ok'
 
 

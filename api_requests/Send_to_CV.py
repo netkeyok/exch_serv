@@ -309,37 +309,42 @@ async def send_storeloc():
         await send_request(warehouse_url, warehouse_json)
 
 
-async def clear_postuplenie(swith=None):
+async def clear_postuplenie(day=1):
+    gmt_plus_5 = timezone(timedelta(hours=5))
+    current_time = datetime.now(gmt_plus_5)
+    start_of_today = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Начало вчерашнего дня в UTC
+    start_of_yesterday = start_of_today - timedelta(days=day)
+
+    # Конец вчерашнего дня в UTC
+    end_of_yesterday = start_of_today - timedelta(seconds=1)
+
     # Очистка документов поступления, разрешенных для удаления
 
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
     async with aiohttp.ClientSession() as sessionapi:
-        # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
-        async with sessionapi.get(postuplenie_url, headers=header) as response:
-            # Получаем кодировку, статус и текст ответа асинхронно с помощью await
-            status = response.status
-            data_js = await response.json()
-            data_list = data_js['value']
-            for data in data_list:
-                doclist = Postuplenie(**data)
-                if swith:
-                    print(f'del {doclist.id}, {doclist.finished}')
-                    del_url_with_id = f'{postuplenie_url}({doclist.id})'
-                    async with sessionapi.delete(del_url_with_id) as del_response:
-                        print(del_response.status)
+        try:
+            # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
+            async with sessionapi.get(postuplenie_url, headers=header) as response:
+                # Получаем кодировку, статус и текст ответа асинхронно с помощью await
+                status = response.status
+                if status == 200:
+                    data_js = await response.json()
+                    data_list = data_js['value']
+                    for data in data_list:
+                        doclist = Postuplenie(**data)
+                        if start_of_yesterday <= doclist.lastChangeDate <= end_of_yesterday and doclist.finished == True:
+                            del_url_with_id = f'{postuplenie_url}({doclist.id})'
+                            async with sessionapi.delete(del_url_with_id) as del_response:
+                                print(del_response.status)
                 else:
-                    if doclist.finished and doclist.PermitDel == True:
-                        #     print(f'del {doclist.id}, {doclist.finished}')
-                        # else:
-                        print(f'del {doclist.id}, {doclist.finished}')
-                        del_url_with_id = f'{postuplenie_url}({doclist.id})'
-                        async with sessionapi.delete(del_url_with_id) as del_response:
-                            print(del_response.status)
-            # Проверяем статус ответа и выводим результат
-            if status not in (200,):
-                print('Произошла ошибка при запросе на сервер')
-                print(status)
-                print(response)
+                    print('Произошла ошибка при запросе на сервер')
+                    print(status)
+                    print(response)
+        except Exception as e:
+            print(f'An error occurred: {e}')
+    await sessionapi.close()
 
 
 async def send_postuplenie_items(docid):

@@ -110,7 +110,6 @@ async def send_wi():
                             state = states.find('state').text
                             if state == 'Success':
                                 send_post(doclist.warehouseId, wi_id)
-                                # await permitdel(doclist.id)
                                 result = f'send doc {wi_id}'
                                 break
                             elif state not in ('Success', 'Handling', 'Queued'):
@@ -132,8 +131,6 @@ async def get_wi_items(or_id, wi_id):
             mismathlist = []
             for data in data_list:
                 docitems = DocumentItem(**data)
-                # print(docitems.Price, docitems.PriceTotal)
-                print(f'Article {docitems.productId}, uid {docitems.uid}, bindedLineUid {docitems.bindedLineUid}')
                 smspec = SMSpec(
                     DOCID=wi_id,
                     DOCTYPE="WI",
