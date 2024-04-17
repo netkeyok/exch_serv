@@ -19,6 +19,7 @@ class DocumentItem(BaseModel):
     packingName: Optional[str] = Field(None, write_only=True)
     price: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
     priceTotal: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    bindedLineUid: Optional[str] = None
 
 
 class Postuplenie(BaseModel):

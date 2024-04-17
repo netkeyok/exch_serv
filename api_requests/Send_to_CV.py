@@ -239,7 +239,8 @@ async def send_postuplenie(docid=None):
                    SMDocuments.CREATEDAT,
                    SMDocuments.CLIENTINDEX,
                    SMDocuments.TOTALSUM)
-            .where(SMDocuments.DOCTYPE.in_(['2', 'OR']),
+            .where(SMDocuments.DOCTYPE.in_(['OR']),
+                   SMDocuments.DOCSTATE.in_(['2']),
                    SMDocuments.CREATEDAT.between(days_ago, datetime.now())
                    )
         )
@@ -312,8 +313,6 @@ async def clear_postuplenie(swith=None):
     # Очистка документов поступления, разрешенных для удаления
 
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
-    # url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
-    # del_url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
         async with sessionapi.get(postuplenie_url, headers=header) as response:
@@ -375,8 +374,6 @@ async def send_postuplenie_items(docid):
 
 async def get_finalized_doc():
     # Получить список документов завершенных на ТСД
-    # url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
-    # url_items = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
         async with sessionapi.get(postuplenie_url, headers=header) as response:
@@ -399,11 +396,11 @@ async def get_finalized_doc():
 
 if __name__ == '__main__':
     # asyncio.run(load_card('014073'))
-    asyncio.run(send_articles())
+    # asyncio.run(send_articles())
     # asyncio.run(load_contragents())
     # asyncio.run(send_postuplenie('7ORA-E643252'))
     # asyncio.run(send_storeloc())
-    # asyncio.run(clear_postuplenie(1))
+    asyncio.run(clear_postuplenie())
     # asyncio.run(get_finalized_doc())
     # asyncio.run(permitdel())
     # asyncio.run(read_request_sm('23fa886b-4aea-4b12-a697-9e6cb8d0f7df'))

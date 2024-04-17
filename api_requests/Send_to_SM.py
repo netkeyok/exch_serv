@@ -110,7 +110,7 @@ async def send_wi():
                             state = states.find('state').text
                             if state == 'Success':
                                 send_post(doclist.warehouseId, wi_id)
-                                await permitdel(doclist.id)
+                                # await permitdel(doclist.id)
                                 result = f'send doc {wi_id}'
                                 break
                             elif state not in ('Success', 'Handling', 'Queued'):
@@ -128,19 +128,18 @@ async def get_wi_items(or_id, wi_id):
             status = response.status
             data_js = await response.json()
             data_list = data_js['value']
-            specitem = 0
             smspeclist = []
             mismathlist = []
             for data in data_list:
                 docitems = DocumentItem(**data)
-                specitem += 1
                 # print(docitems.Price, docitems.PriceTotal)
+                print(f'Article {docitems.productId}, uid {docitems.uid}, bindedLineUid {docitems.bindedLineUid}')
                 smspec = SMSpec(
                     DOCID=wi_id,
                     DOCTYPE="WI",
                     SPECITEM=docitems.uid,
                     ARTICLE=docitems.productId,
-                    DISPLAYITEM=specitem,
+                    DISPLAYITEM=docitems.uid,
                     ITEMPRICE=docitems.price,
                     QUANTITY=docitems.currentQuantity,
                     TOTALPRICE=docitems.priceTotal,
@@ -149,7 +148,7 @@ async def get_wi_items(or_id, wi_id):
                 specmismath = SLSpecqmismatch(
                     DOCID=wi_id,
                     DOCTYPE="WI",
-                    SPECITEM=specitem,
+                    SPECITEM=docitems.uid,
                     QUANTBYDOC=docitems.declaredQuantity,
                 )
                 smspeclist.append(smspec)
