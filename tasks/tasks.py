@@ -11,13 +11,13 @@ celery_app = Celery('tasks', broker=f'redis://:{REDIS_PASS}@{REDIS_HOST}:6379/0'
 celery_app.conf.timezone = 'Asia/Yekaterinburg'
 
 celery_app.conf.beat_schedule = {
+    'add-every-5-minutes': {
+        'task': 'tasks.tasks.start_send_docs',
+        'schedule': crontab(minute='*/5', hour='8-23'),
+    },
     'send-articles-daily-at-7am': {
         'task': 'tasks.tasks.start_send_articles',
         'schedule': crontab(minute='0', hour='7'),
-    },
-    'clear-clear-docs-daily-at-6am': {
-        'task': 'tasks.tasks.start_clear_docs',
-        'schedule': crontab(minute='0', hour='6'),
     },
 }
 
