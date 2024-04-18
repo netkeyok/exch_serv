@@ -54,11 +54,11 @@ class SMCard(Base):
     quantitydeviation = Column(Integer)
     usetime = Column(Integer)
     usetimedim = Column(Integer)
-    weight = Column(Integer)
+    weight = Column(Float)  # changed from Integer to Float
     idmeasweight = Column(Integer)
-    width = Column(Integer)
-    length = Column(Integer)
-    height = Column(Integer)
+    width = Column(Float)  # changed from Integer to Float
+    length = Column(Float)  # changed from Integer to Float
+    height = Column(Float)  # changed from Integer to Float
     idmeasdim = Column(Integer)
     stateregulation = Column(Integer)
     icing = Column(Integer)

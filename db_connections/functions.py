@@ -60,3 +60,7 @@ def send_post(mx_id, doc_id):
 
         # Закрытие сессии
         session.close()
+
+
+if __name__ == '__main__':
+    pass
