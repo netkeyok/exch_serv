@@ -194,9 +194,10 @@ async def send_articles():
 
     # Передаем на сервер запрос на обновление справочника
     await send_request(begin_product, None)
+
     # получаем список всех article, удовлетворяющих условиям
-    query = select(SMCard.article).where(SMCard.receiptok == '1',
-                                         SMCard.accepted == '1',
+    query = select(SMCard.article).where(SMCard.receiptok == 1,
+                                         SMCard.accepted == 1,
                                          exists().where(SMCard.article == SMStoreUnits.article))
     cards = session.execute(query).fetchall()
     counter = 0
@@ -272,18 +273,6 @@ async def send_postuplenie(docid=None):
         await send_request(postuplenie_url, postuplenie_json)
 
 
-async def permitdel(docid):
-    # Установка атрибута PermitDel для разрешения удаления документа с сервера
-    doc = Postuplenie(
-        id=docid,
-        PermitDel=True
-    )
-
-    postuplenie_json = doc.model_dump_json(exclude_none=True)
-    print(postuplenie_json)
-    await send_request(postuplenie_url, postuplenie_json)
-
-
 async def send_storeloc():
     # Загрузка справочников мест хранения в Клеверенс
     query = (
@@ -309,38 +298,7 @@ async def send_storeloc():
         await send_request(warehouse_url, warehouse_json)
 
 
-async def clear_postuplenie(day=None, doc_id=None):
-    gmt_plus_5 = timezone(timedelta(hours=5))
-    current_time = datetime.now(gmt_plus_5)
-    start_of_today = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-    # Начало вчерашнего дня в UTC
-    start_of_yesterday = start_of_today - timedelta(days=day)
-    # Конец вчерашнего дня в UTC
-    end_of_yesterday = start_of_today - timedelta(seconds=1)
-    # Создаем сессию клиента с помощью асинхронного менеджера контекста
-    if day:
-        async with aiohttp.ClientSession() as sessionapi:
-            try:
-                # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
-                async with sessionapi.get(postuplenie_url, headers=header) as response:
-                    # Получаем кодировку, статус и текст ответа асинхронно с помощью await
-                    status = response.status
-                    if status == 200:
-                        data_js = await response.json()
-                        data_list = data_js['value']
-                        for data in data_list:
-                            doclist = Postuplenie(**data)
-                            if start_of_yesterday <= doclist.lastChangeDate <= end_of_yesterday and doclist.finished == True:
-                                del_url_with_id = f'{postuplenie_url}({doclist.id})'
-                                async with sessionapi.delete(del_url_with_id) as del_response:
-                                    print(del_response.status)
-                    else:
-                        print('Произошла ошибка при запросе на сервер')
-                        print(status)
-                        print(response)
-            except Exception as e:
-                print(f'An error occurred: {e}')
-    else:
+async def clear_postuplenie(doc_id):
         async with aiohttp.ClientSession() as sessionapi:
             try:
                 del_url_with_id = f'{postuplenie_url}({doc_id})'
@@ -348,7 +306,7 @@ async def clear_postuplenie(day=None, doc_id=None):
                     print(del_response.status)
             except Exception as e:
                 print(f'An error occurred: {e}')
-    await sessionapi.close()
+        await sessionapi.close()
 
 
 async def send_postuplenie_items(docid):
@@ -405,11 +363,11 @@ async def get_finalized_doc():
 
 if __name__ == '__main__':
     # asyncio.run(load_card('014073'))
-    # asyncio.run(send_articles())
+    asyncio.run(send_articles())
     # asyncio.run(load_contragents())
     # asyncio.run(send_postuplenie('7ORA-E643252'))
     # asyncio.run(send_storeloc())
-    asyncio.run(clear_postuplenie())
+    # asyncio.run(clear_postuplenie('28ORA-E660518'))
     # asyncio.run(get_finalized_doc())
     # asyncio.run(permitdel())
     # asyncio.run(read_request_sm('23fa886b-4aea-4b12-a697-9e6cb8d0f7df'))

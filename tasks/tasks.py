@@ -11,10 +11,6 @@ celery_app = Celery('tasks', broker=f'redis://:{REDIS_PASS}@{REDIS_HOST}:6379/0'
 celery_app.conf.timezone = 'Asia/Yekaterinburg'
 
 celery_app.conf.beat_schedule = {
-    # 'add-every-5-minutes': {
-    #     'task': 'tasks.tasks.start_send_docs',
-    #     'schedule': crontab(minute='*/5', hour='8-23'),
-    # },
     'send-articles-daily-at-7am': {
         'task': 'tasks.tasks.start_send_articles',
         'schedule': crontab(minute='0', hour='7'),
@@ -37,11 +33,4 @@ def start_send_docs():
 def start_send_articles():
     loop = asyncio.get_event_loop()
     result = loop.run_until_complete(send_articles())
-    return result
-
-
-@celery_app.task
-def start_clear_docs():
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(clear_postuplenie())
     return result

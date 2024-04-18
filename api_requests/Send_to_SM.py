@@ -6,7 +6,7 @@ import json
 import xml.etree.ElementTree as ET
 from sm_api_models.WI import Data, Package, Item, WI, SMDocuments
 from sm_api_models.WI import SMCommonbases, SMWaybillIn, SMSpec, SLSpecqmismatch
-from api_requests.Send_to_CV import send_request, permitdel, read_request_sm
+from api_requests.Send_to_CV import send_request, read_request_sm, clear_postuplenie
 from cv_models.Postuplenie import Postuplenie, DocumentItem
 from db_connections.functions import generate_number, send_post
 
@@ -111,7 +111,7 @@ async def send_wi():
                             if state == 'Success':
                                 send_post(doclist.warehouseId, wi_id)
                                 result = f'send doc {wi_id}'
-                                await permitdel(doclist.id)
+                                await clear_postuplenie(doclist.id)
                                 break
                             elif state not in ('Success', 'Handling', 'Queued'):
                                 result = f"Документ не обработан статус: {state}"
