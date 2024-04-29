@@ -30,13 +30,17 @@ def get_card(code):
         .join(SMStoreUnits, SMCard.article == SMStoreUnits.article)
         .where(SMStoreUnits.barcode == code)
     )
-    results = session.execute(request).all()
+    results = session.execute(request).fetchone()
     if results:
-        data = [{"article": item[0], "name": item[1]} for item in results]
+        # print(results)
+        data = {"article": results[0], "name": results[1]}
         return data
     else:
-        return {"article": '000000', "name": 'Не найден в СМ'}
+        # return {"article": '000000', "name": 'Не найден в СМ'}
+        return None
 
 
 if __name__ == '__main__':
     print(get_card('4680089950555'))
+    # print(get_card('4680089950661'))
+    pass
