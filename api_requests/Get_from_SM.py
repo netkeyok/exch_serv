@@ -31,8 +31,12 @@ def get_card(code):
         .where(SMStoreUnits.barcode == code)
     )
     results = session.execute(request).all()
-    return results
+    if results:
+        data = [{"article": item[0], "name": item[1]} for item in results]
+        return data
+    else:
+        return {"article": '000000', "name": 'Не найден в СМ'}
 
 
 if __name__ == '__main__':
-    print(get_card('4604048005704'))
+    print(get_card('4680089950555'))

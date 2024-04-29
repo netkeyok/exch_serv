@@ -76,7 +76,7 @@ async def send_wi():
                                                 ID=wi_id,
                                                 DOCTYPE="WI",
                                                 GOODSOWNER=0,
-                                                # OURSELFCLIENT=101085,
+                                                OURSELFCLIENT=None,
                                                 PAYCASH="0",
                                                 SUPPLDOCSUM=doclist.summaDokumenta,  # Сумма по документу поставщика
                                                 SUPPLIERDOC=doclist.id,  # Номер документа поставщика

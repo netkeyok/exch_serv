@@ -53,8 +53,8 @@ async def clear_docs(days):
 async def get_SMcard(bar: str):
     result = get_card(bar)
     # Предполагаем, что result - это список кортежей
-    data = [{"article": item[0], "name": item[1]} for item in result]
-    return JSONResponse(content=data)
+
+    return JSONResponse(content=result)
 
 
 @app.post("/v1/func/send_sku")

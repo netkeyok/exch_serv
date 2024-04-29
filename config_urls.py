@@ -1,6 +1,6 @@
 
-api_server_ip = '192.168.0.166'
-api_server_port = '9000'
+api_server_ip = '192.168.0.123'
+api_server_port = '9002'
 
 # Clevrense urls
 baseURL = f'http://{api_server_ip}:{api_server_port}/MobileSMARTS/api/v1/'
