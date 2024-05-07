@@ -1,4 +1,4 @@
-from sm_api_models import WI, RL, UI, OR
+from api_models.Supermag import OR, UI, WI, RL
 
 
 def parse_ui(doc_dict):
@@ -177,13 +177,3 @@ def parse_wi(doc_dict):
 # print(f'quantity: {quantity}')
 
 
-def parse_or(doc_dict):
-    # print(doc_dict)
-    data = OR.Data(**doc_dict)
-    # получаем список постобъектов
-    postobjects = data.PACKAGE.POSTOBJECT
-    doclist = []
-    for postobject in postobjects:
-        docid = postobject.Id
-        doclist.append(docid[2:])
-    return doclist

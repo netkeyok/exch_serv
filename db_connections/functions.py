@@ -1,9 +1,7 @@
-import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
-from sqlalchemy import select, func, text
+from sqlalchemy import func, text
 
-from cv_models.Postuplenie import Postuplenie
 from db_connections.oramodels import SMDocuments, SADocDefaults, SMPostLocMap, SMPostQueue
 from db_connections.db_conf import session
 

@@ -8,6 +8,7 @@ class DocumentItem(BaseModel):
     # определяем атрибуты класса с аннотациями типов
     uid: Optional[str] = None
     createdBy: Optional[str] = None  # = Field(None, choices=[0, 1, 2, 3], read_only=True)
+    # createdBy: Optional[str] = '2'
     productId: Optional[str]
     declaredQuantity: Optional[float]
     currentQuantity: Optional[float] = None
@@ -17,9 +18,10 @@ class DocumentItem(BaseModel):
     productMarking: Optional[str] = Field(None, write_only=True)
     productBarcode: Optional[str] = Field(None, write_only=True)
     packingName: Optional[str] = Field(None, write_only=True)
-    price: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    cena: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
     priceTotal: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
     bindedLineUid: Optional[str] = None
+    idEdinicyIzmereniya: Optional[str] = None
 
 
 class Postuplenie(BaseModel):
@@ -48,4 +50,4 @@ class Postuplenie(BaseModel):
     idKontragenta: Optional[str] = None
     declaredItems: Optional[list[DocumentItem]] = Field(None, read_only=True)
     summaDokumenta: Optional[float] = None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV
-    PermitDel: bool = False
+    selfclient: Optional[int] = None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV

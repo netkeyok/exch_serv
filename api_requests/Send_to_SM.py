@@ -1,16 +1,16 @@
 import asyncio
 import time
+from datetime import datetime
 
 import aiohttp
 import json
 import xml.etree.ElementTree as ET
-from sm_api_models.WI import Data, Package, Item, WI, SMDocuments
-from sm_api_models.WI import SMCommonbases, SMWaybillIn, SMSpec, SLSpecqmismatch
+from api_models.Supermag.WI import Data, Package, Item, WI, SMDocuments
+from api_models.Supermag.WI import SMCommonbases, SMWaybillIn, SMSpec, SLSpecqmismatch
 from api_requests.Send_to_CV import send_request, read_request_sm, clear_postuplenie
-from cv_models.Postuplenie import Postuplenie, DocumentItem
+from api_models.Cleverence.Postuplenie import Postuplenie, DocumentItem
+from config_urls import postuplenie_url, header
 from db_connections.functions import generate_number, send_post
-
-header = {'Content-Type': 'application/json'}
 
 
 async def send_wi():
@@ -28,8 +28,9 @@ async def send_wi():
                 doclist = Postuplenie(**data)
                 if doclist.finished:
                     print(doclist)
-                    cv_date = doclist.createDate
-                    formatted_date = cv_date.strftime("%Y-%m-%dT%H:%M:%S")
+                    cv_date = doclist.createDate.strftime("%Y-%m-%dT%H:%M:%S")
+                    # formatted_date = cv_date.strftime("%Y-%m-%dT%H:%M:%S")
+                    date_doc = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                     wi_id = generate_number(doclist.warehouseId)
                     items = await get_wi_items(doclist.id, wi_id)
                     print(wi_id, doclist.id)
@@ -50,7 +51,8 @@ async def send_wi():
                                                 BORNIN="zW3taivnRyidInB3UjAdZQ00",
                                                 CLIENTINDEX=doclist.idKontragenta,
                                                 COMMENTARY=doclist.name,
-                                                CREATEDAT=formatted_date,
+                                                # CREATEDAT=formatted_date,
+                                                CREATEDAT=date_doc,
                                                 CURRENCYMULTORDER=0,
                                                 CURRENCYRATE=1.0,
                                                 CURRENCYTYPE=1,
@@ -76,11 +78,11 @@ async def send_wi():
                                                 ID=wi_id,
                                                 DOCTYPE="WI",
                                                 GOODSOWNER=0,
-                                                OURSELFCLIENT=None,
+                                                OURSELFCLIENT=doclist.selfclient,
                                                 PAYCASH="0",
                                                 SUPPLDOCSUM=doclist.summaDokumenta,  # Сумма по документу поставщика
                                                 SUPPLIERDOC=doclist.id,  # Номер документа поставщика
-                                                SUPPLIERDOCCREATE=formatted_date,  # Дата документа поставщика
+                                                SUPPLIERDOCCREATE=cv_date,  # Дата документа поставщика
 
                                             )
                                         ]
@@ -120,7 +122,7 @@ async def send_wi():
 
 
 async def get_wi_items(or_id, wi_id):
-    get_doc_items_url = f"http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie('{or_id}')/declaredItems"
+    get_doc_items_url = f"{postuplenie_url}('{or_id}')/declaredItems"
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
         async with sessionapi.get(get_doc_items_url, headers=header) as response:

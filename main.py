@@ -1,10 +1,10 @@
 from fastapi import FastAPI, File
 from fastapi.responses import JSONResponse
 import json
-from cm_datamining import parse_ui, parse_wi, parse_rl, parse_or
-from api_requests.Send_to_CV import send_postuplenie, clear_postuplenie, send_articles
-from api_requests.Send_to_SM import send_wi
-from api_requests.Get_from_SM import get_card
+from cm_datamining import parse_ui, parse_wi, parse_rl
+from parsing.OR import parse_or
+from api_requests.Send_to_CV import clear_postuplenie, send_articles
+from db_connections.Get_from_SM import get_card
 
 app = FastAPI()
 
@@ -31,10 +31,7 @@ async def upload_data(file: bytes = File()):
         print('end')
     elif 'OR' in docdict[0].keys():
         print('start receiving OR')
-        doclist = parse_or(dictionary)
-        for docid in doclist:
-            await send_postuplenie(docid)
-            print(docid)
+        await parse_or(dictionary)
         print('end receiving OR')
     else:
         print('---------------------------------------')
