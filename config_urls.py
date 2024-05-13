@@ -1,5 +1,5 @@
 
-api_server_ip = '192.168.0.123'
+api_server_ip = '192.168.0.166'
 api_server_port = '9000'
 
 header = {'Content-Type': 'application/json'}
