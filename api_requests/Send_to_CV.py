@@ -10,15 +10,16 @@ from sqlalchemy import select, exists
 
 from api_models.Cleverence.Products import Product
 from api_models.Cleverence.Contragents import Contragent
-from api_models.Cleverence.Postuplenie import Postuplenie, DocumentItem
 from api_models.Cleverence.Warehouse import Warehouse
-from api_models.Supermag import IOSMIOSTORELOCATIONS, IOUSIOSMCONTRAGENT
-from api_requests.get_from_sm import get_request
+from api_models.Supermag import IOSMIOSTORELOCATIONS, IOUSIOSMCONTRAGENT, OR
+from api_requests.get_from_sm import get_request, get_mesabbrev
 from db_connections.oramodels import SMStoreUnits, SMCard, SMClientInfo, SMDocuments, SMStoreLocations, SMSpecor
 from db_connections.db_conf import session
 from config_urls import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent, \
     header, storelocs_sm_url, contragents_sm_url
 from config_urls import postuplenie_url, warehouse_url, ticket_url
+
+from api_models.Cleverence.Postuplenie import Postuplenie, DocumentItem
 
 gmt5 = timezone(timedelta(hours=5))
 
@@ -427,12 +428,59 @@ async def get_finalized_doc(days: int):
     return docs_list
 
 
+async def send_or_to_cv(doc_dict):
+    data = OR.Data(**doc_dict)
+    # получаем список постобъектов
+    # print(data)
+    postobjects = data.PACKAGE.POSTOBJECT
+    print(postobjects)
+    for postobject in postobjects:
+        docdata = postobject.OR.SMDOCUMENTS[0]
+        print(docdata)
+        docitems = postobject.OR.SMSPECOR
+        ourselfclient = postobject.OR.SMDOCOR[0].OURSELFCLIENT
+        original_datetime = postobject.OR.SMDOCUMENTS[0].CREATEDAT
+
+        formatted_datetime = original_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        timezone_info = datetime.now(timezone.utc).astimezone().strftime("%z")
+        formatted_datetime_with_timezone = f"{formatted_datetime}{timezone_info}"
+        # Получаем строки документа
+        spec_list = []
+        print(docitems)
+        for items in docitems:
+            mesabbr = await get_mesabbrev(items.ARTICLE)
+            spec_items = DocumentItem(
+                uid=str(items.SPECITEM),
+                productId=items.ARTICLE,
+                declaredQuantity=items.QUANTITY,
+                idEdinicyIzmereniya=mesabbr,
+                packingId=mesabbr,
+                cena=items.ITEMPRICE,
+                priceTotal=items.TOTALPRICE
+            )
+            spec_list.append(spec_items)
+
+        # Получаем шапку документа
+        doc = Postuplenie(
+            id=docdata.ID,
+            name=f"Прием ТСД по заказу: {docdata.ID}",
+            createDate=formatted_datetime_with_timezone,
+            warehouseId=str(docdata.LOCATION),
+            idKontragenta=str(docdata.CLIENTINDEX),
+            summaDokumenta=docdata.TOTALSUM,
+            declaredItems=spec_list,
+            selfclient=ourselfclient
+        )
+        postuplenie_json = doc.model_dump_json(exclude_none=True)
+        await send_request(postuplenie_url, postuplenie_json)
+
+
 if __name__ == '__main__':
     # asyncio.run(load_card('014073'))
-    # asyncio.run(send_articles())
+    asyncio.run(send_articles())
     # asyncio.run(send_contragents())
     # asyncio.run(send_postuplenie('7ORA-E643252'))
-    asyncio.run(send_storeloc())
+    # asyncio.run(send_storeloc())
     # asyncio.run(clear_postuplenie('28ORA-E660518'))
     # data = asyncio.run(get_finalized_doc(2))
     # print(data)

@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from typing import List, Optional
+from pydantic import BaseModel, UUID4
+from datetime import datetime
+
 
 class SMCARD(BaseModel):
     ARTICLE: str
@@ -11,11 +13,11 @@ class SMCARD(BaseModel):
     CARBS: Optional[str]
     CARDCOMMENT: Optional[str]
     CASHLOAD: str
-    COUNTRY: str
+    COUNTRY: Optional[str]
     CUTPRICEDAYS: int
     DATASUBTYPE: int
     DATATYPE: int
-    DEADLINE: int
+    DEADLINE: Optional[str]
     FATS: Optional[str]
     FLAGS: int
     GLOBALARTICLE: str
@@ -52,36 +54,37 @@ class SMCARD(BaseModel):
     SUBARTICLE: Optional[str]
     SUPPLYPRICEPERCENTM: Optional[str]
     SUPPLYPRICEPERCENTP: Optional[str]
-    USETIME: int
+    USETIME: Optional[int]
     USETIMEDIM: int
     WASTE: float
     WEIGHT: Optional[str]
     WIDTH: Optional[str]
 
-class SMCARDPROPERTIES(BaseModel):
-    ARTICLE:str 
-    PROPID:str 
-    PROPVAL:str
 
 class SMCARDTAX(BaseModel):
-    ARTICLE:str 
-    RGNID:int 
-    DATEFROM:str 
-    DATETO:str 
-    TAXGROUPID:int
+    ARTICLE: str
+    RGNID: int
+    DATEFROM: datetime
+    DATETO: datetime
+    TAXGROUPID: int
+
 
 class CD(BaseModel):
-    SMCARD : List[SMCARD] = Field(...)
-    SMCARDPROPERTIES : List[SMCARDPROPERTIES] = Field(...)
-    SMCARDTAX : List[SMCARDTAX] = Field(...)
+    SMCARD: List[SMCARD]
+    SMCARDTAX: List[SMCARDTAX]
+
 
 class POSTOBJECT(BaseModel):
-    description:str 
-    action:str 
-    Id:str 
-    CD : CD = Field(...)
+    description: str
+    action: str
+    Id: str
+    CD: CD
+
 
 class PACKAGE(BaseModel):
-    name:str 
-    POSTOBJECT : List[POSTOBJECT] = Field(...)
-    
+    name: UUID4
+    POSTOBJECT: List[POSTOBJECT]
+
+
+class DataModel(BaseModel):
+    PACKAGE: PACKAGE

@@ -1,6 +1,10 @@
+import asyncio
+import json
+
 import aiohttp
 
-from config_urls import header
+from api_models.Supermag import CD, USIOMESABBREVINFO
+from config_urls import header, smcard_sm_url
 
 
 async def get_request(url, js_data=None):
@@ -20,3 +24,19 @@ async def get_request(url, js_data=None):
                 print(status)
                 print(response)
     return text
+
+
+async def get_mesabbrev(article):
+    # print(article)
+    url = f'{smcard_sm_url}{article}'
+    data = await get_request(url)
+    dictionary = json.loads(data)
+    data_model = USIOMESABBREVINFO.DataModel(**dictionary)
+    for data in data_model:
+        mesabbrev = data[1].POSTOBJECT[0].IOUSIOMESABBREVINFO.USIOMESABBREVINFO[0].MESABBREV
+        return mesabbrev
+
+
+if __name__ == '__main__':
+    asyncio.run(get_mesabbrev('113057'))
+    pass

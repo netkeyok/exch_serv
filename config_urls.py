@@ -35,3 +35,5 @@ ticket_url = f"http://192.168.0.238:8080/out/ticket/"
 storelocs_sm_url = f'{supermag_url}IOSMIOSTORELOCATIONS/*'
 
 contragents_sm_url = f'{supermag_url}IOUSIOSMCONTRAGENT/*'
+
+smcard_sm_url = f'{supermag_url}IOUSIOMESABBREVINFO/*/pArticle='
