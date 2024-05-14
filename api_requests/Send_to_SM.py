@@ -109,7 +109,8 @@ async def send_wi():
                             states = ET.fromstring(request_text)
                             state = states.find('state').text
                             if state == 'Success':
-                                # send_post(doclist.warehouseId, wi_id)
+                                print(wi_id, doclist.warehouseId)
+                                send_post(doclist.warehouseId, wi_id)
                                 result = f'send doc {wi_id}'
                                 await clear_postuplenie(doclist.id)
                                 break
