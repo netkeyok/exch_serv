@@ -138,7 +138,7 @@ async def get_wi_items(or_id, wi_id):
                     SPECITEM=docitems.uid,
                     ARTICLE=docitems.productId,
                     DISPLAYITEM=docitems.uid,
-                    ITEMPRICE=docitems.сena,
+                    ITEMPRICE=docitems.cena,
                     QUANTITY=docitems.currentQuantity,
                     TOTALPRICE=docitems.priceTotal,
                     TOTALPRICECUR=docitems.priceTotal
@@ -152,7 +152,7 @@ async def get_wi_items(or_id, wi_id):
                 smspeclist.append(smspec)
                 mismathlist.append(specmismath)
             # Проверяем статус ответа и выводим результат
-            if status not in (200,):
+            if status not in (200, 204):
                 print('Произошла ошибка при запросе на сервер')
                 print(status)
                 print(response)
