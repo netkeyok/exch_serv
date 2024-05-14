@@ -41,11 +41,9 @@ def mxid_to_postid(mx_id):
 def send_post(mx_id, doc_id):
     with session.begin():
         raw_sql = text("select supermag.SMPostQueueSeq.NEXTVAL from dual")
-        # current_datetime = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
         # получаем префикс документа для заданного места хранения
         post_id = (
             session.query(SMPostLocMap.DBASEID).where(SMPostLocMap.STORELOC == mx_id).scalar())
-        # post_id = int(select(SMPostLocMap.DBASEID).where(SMPostLocMap.STORELOC == mx_id).as_scalar())
         # Получаем последний номер существующего документа
         new_post = SMPostQueue(
             ENQTIME=datetime.now(),

@@ -36,7 +36,6 @@ def get_card(code):
         data = {"article": results[0], "name": results[1]}
         return data
     else:
-        # return {"article": '000000', "name": 'Не найден в СМ'}
         return None
 
 

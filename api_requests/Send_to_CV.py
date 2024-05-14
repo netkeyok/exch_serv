@@ -433,10 +433,8 @@ async def send_or_to_cv(doc_dict):
     # получаем список постобъектов
     # print(data)
     postobjects = data.PACKAGE.POSTOBJECT
-    print(postobjects)
     for postobject in postobjects:
         docdata = postobject.OR.SMDOCUMENTS[0]
-        print(docdata)
         docitems = postobject.OR.SMSPECOR
         ourselfclient = postobject.OR.SMDOCOR[0].OURSELFCLIENT
         original_datetime = postobject.OR.SMDOCUMENTS[0].CREATEDAT
@@ -446,7 +444,6 @@ async def send_or_to_cv(doc_dict):
         formatted_datetime_with_timezone = f"{formatted_datetime}{timezone_info}"
         # Получаем строки документа
         spec_list = []
-        print(docitems)
         for items in docitems:
             mesabbr = await get_mesabbrev(items.ARTICLE)
             spec_items = DocumentItem(

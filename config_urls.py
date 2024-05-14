@@ -28,12 +28,13 @@ postupleniebaza_url = f'{cleverence_url}Docs/PostuplenieBaza'
 warehouse_url = f'{cleverence_url}Warehouses'
 
 # Супермаг urls
-supermag_url = 'http://192.168.0.238:8080/out/json/'
+supermag_out_url = 'http://192.168.0.238:8080/out/json/'
+supermag_in_url = 'http://192.168.0.238:8080/in/json/'
 
 ticket_url = f"http://192.168.0.238:8080/out/ticket/"
 
-storelocs_sm_url = f'{supermag_url}IOSMIOSTORELOCATIONS/*'
+storelocs_sm_url = f'{supermag_out_url}IOSMIOSTORELOCATIONS/*'
 
-contragents_sm_url = f'{supermag_url}IOUSIOSMCONTRAGENT/*'
+contragents_sm_url = f'{supermag_out_url}IOUSIOSMCONTRAGENT/*'
 
-smcard_sm_url = f'{supermag_url}IOUSIOMESABBREVINFO/*/pArticle='
+smcard_sm_url = f'{supermag_out_url}IOUSIOMESABBREVINFO/*/pArticle='

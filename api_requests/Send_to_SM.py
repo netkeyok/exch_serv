@@ -9,19 +9,19 @@ from api_models.Supermag.WI import Data, Package, Item, WI, SMDocuments
 from api_models.Supermag.WI import SMCommonbases, SMWaybillIn, SMSpec, SLSpecqmismatch
 from api_requests.Send_to_CV import send_request, read_request_sm, clear_postuplenie
 from api_models.Cleverence.Postuplenie import Postuplenie, DocumentItem
-from config_urls import postuplenie_url, header
+from config_urls import postuplenie_url, header, supermag_in_url
 from db_connections.functions import generate_number, send_post
 
 
 async def send_wi():
     print("Start sending WI")
     # Создаем сессию клиента с помощью асинхронного менеджера контекста
-    url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
+    # url = 'http://192.168.0.166:9000/MobileSMARTS/api/v1/Docs/Postuplenie'
 
     async with aiohttp.ClientSession() as sessionapi:
         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
         result = 'Nothing to send'
-        async with sessionapi.get(url, headers=header) as response:
+        async with sessionapi.get(postuplenie_url, headers=header) as response:
             data_js = await response.json()
             data_list = data_js['value']
             for data in data_list:
@@ -29,11 +29,9 @@ async def send_wi():
                 if doclist.finished:
                     print(doclist)
                     cv_date = doclist.createDate.strftime("%Y-%m-%dT%H:%M:%S")
-                    # formatted_date = cv_date.strftime("%Y-%m-%dT%H:%M:%S")
                     date_doc = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
                     wi_id = generate_number(doclist.warehouseId)
                     items = await get_wi_items(doclist.id, wi_id)
-                    print(wi_id, doclist.id)
                     # Создаем экземпляр модели
                     wi_data = Data(
                         PACKAGE=Package(
@@ -51,7 +49,6 @@ async def send_wi():
                                                 BORNIN="zW3taivnRyidInB3UjAdZQ00",
                                                 CLIENTINDEX=doclist.idKontragenta,
                                                 COMMENTARY=doclist.name,
-                                                # CREATEDAT=formatted_date,
                                                 CREATEDAT=date_doc,
                                                 CURRENCYMULTORDER=0,
                                                 CURRENCYRATE=1.0,
@@ -97,21 +94,22 @@ async def send_wi():
 
                     # Получаем JSON строку из словаря
                     data_json = json.dumps(data_dict, indent=4)
-                    cm_url = 'http://192.168.0.238:8080/in/json'
+                    # cm_url = 'http://192.168.0.238:8080/in/json'
 
                     # print(data_json)
-                    text = await send_request(cm_url, data_json)
+                    text = await send_request(supermag_in_url, data_json)
                     if text:
                         ticket = ET.fromstring(text)
                         ticket_id = ticket.find('ticketId').text
                         while True:
-                            state = 'Handling'
+                            # state = 'Handling'
                             request_text = await read_request_sm(ticket_id)
-                            time.sleep(0.5)
+                            # time.sleep(0.5)
+                            await asyncio.sleep(0.5)
                             states = ET.fromstring(request_text)
                             state = states.find('state').text
                             if state == 'Success':
-                                send_post(doclist.warehouseId, wi_id)
+                                # send_post(doclist.warehouseId, wi_id)
                                 result = f'send doc {wi_id}'
                                 await clear_postuplenie(doclist.id)
                                 break
