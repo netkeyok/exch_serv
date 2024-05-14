@@ -138,7 +138,7 @@ async def get_wi_items(or_id, wi_id):
                     SPECITEM=docitems.uid,
                     ARTICLE=docitems.productId,
                     DISPLAYITEM=docitems.uid,
-                    ITEMPRICE=docitems.price,
+                    ITEMPRICE=docitems.Cena,
                     QUANTITY=docitems.currentQuantity,
                     TOTALPRICE=docitems.priceTotal,
                     TOTALPRICECUR=docitems.priceTotal
