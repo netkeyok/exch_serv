@@ -53,7 +53,7 @@ async def send_wi():
                                                 CURRENCYMULTORDER=0,
                                                 CURRENCYRATE=1.0,
                                                 CURRENCYTYPE=1,
-                                                DOCSTATE=1,
+                                                DOCSTATE=2,
                                                 ISROUBLES="1",
                                                 LOCATIONTO=doclist.warehouseId,
                                                 OPCODE="0",
@@ -110,7 +110,7 @@ async def send_wi():
                             state = states.find('state').text
                             if state == 'Success':
                                 print(wi_id, doclist.warehouseId)
-                                send_post(doclist.warehouseId, wi_id)
+                                # send_post(doclist.warehouseId, wi_id)
                                 result = f'send doc {wi_id}'
                                 await clear_postuplenie(doclist.id)
                                 break
