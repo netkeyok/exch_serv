@@ -6,6 +6,7 @@ from typing import Optional
 
 class DocumentItem(BaseModel):
     # определяем атрибуты класса с аннотациями типов
+    nomerStrokiDokumenta: Optional[int]
     uid: Optional[str] = None
     createdBy: Optional[str] = None  # = Field(None, choices=[0, 1, 2, 3], read_only=True)
     # createdBy: Optional[str] = '2'

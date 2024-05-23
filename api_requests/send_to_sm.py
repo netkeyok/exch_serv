@@ -94,6 +94,7 @@ async def send_wi():
 
                     # print(data_json)
                     text = await send_request(supermag_in_url, data_json)
+                    # print(data_json)
                     if text:
                         ticket = ET.fromstring(text)
                         ticket_id = ticket.find('ticketId').text
@@ -101,7 +102,9 @@ async def send_wi():
                             request_text = await read_request_sm(ticket_id)
                             await asyncio.sleep(0.5)
                             states = ET.fromstring(request_text)
+                            # print(request_text)
                             state = states.find('state').text
+                            # print(state)
                             if state == 'Success':
                                 print(wi_id, doclist.warehouseId)
                                 send_post(doclist.warehouseId, wi_id)
@@ -123,20 +126,22 @@ async def get_wi_items(or_id, wi_id):
             status = response.status
             data_js = await response.json()
             data_list = data_js['value']
-            print(data_list)
             smspeclist = []
             mismathlist = []
             summa_doc = []
+            spec_id = 0
             for data in data_list:
+                spec_id += 1
                 docitems = DocumentItem(**data)
+                result_id = spec_id if docitems.nomerStrokiDokumenta == 0 else docitems.nomerStrokiDokumenta
                 string_summa = docitems.currentQuantity * docitems.cena
                 summa_doc.append(string_summa)
                 smspec = SMSpec(
                     DOCID=wi_id,
                     DOCTYPE="WI",
-                    SPECITEM=docitems.uid,
+                    SPECITEM=result_id,
                     ARTICLE=docitems.productId,
-                    DISPLAYITEM=docitems.uid,
+                    DISPLAYITEM=result_id,
                     ITEMPRICE=docitems.cena,
                     QUANTITY=docitems.currentQuantity,
                     TOTALPRICE=string_summa,
@@ -145,7 +150,7 @@ async def get_wi_items(or_id, wi_id):
                 specmismath = SLSpecqmismatch(
                     DOCID=wi_id,
                     DOCTYPE="WI",
-                    SPECITEM=docitems.uid,
+                    SPECITEM=result_id,
                     QUANTBYDOC=docitems.declaredQuantity,
                 )
                 smspeclist.append(smspec)

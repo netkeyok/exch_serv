@@ -174,7 +174,6 @@ async def send_contragents():
             )
 
             contragents_json = contragents.model_dump_json(exclude_none=True)
-            print(contragents_json)
             # Отправляем данные на сервер.
             await send_request(contragents_url, contragents_json)
     await send_request(end_contragent, None)
@@ -290,10 +289,14 @@ async def send_or_to_cv(doc_dict):
         formatted_datetime_with_timezone = f"{formatted_datetime}{timezone_info}"
         # Получаем строки документа
         spec_list = []
+        spec_id = 0
         for items in docitems:
+            spec_id += 1
+            result_id = str(spec_id if not items.SPECITEM else items.SPECITEM)
             mesabbr = await get_mesabbrev(items.ARTICLE)
             spec_items = DocumentItem(
-                uid=str(items.SPECITEM),
+                nomerStrokiDokumenta=result_id,
+                # uid=str(items.SPECITEM),
                 productId=items.ARTICLE,
                 declaredQuantity=items.QUANTITY,
                 idEdinicyIzmereniya=mesabbr,
@@ -326,7 +329,7 @@ async def send_or_to_cv(doc_dict):
 if __name__ == '__main__':
     # asyncio.run(load_card('014073'))
     # asyncio.run(send_articles())
-    data = asyncio.run(get_finalized_doc(2))
+    # data = asyncio.run(get_finalized_doc(2))
     # print(data)
 
     # asyncio.run(send_contragents())
@@ -335,8 +338,8 @@ if __name__ == '__main__':
     # asyncio.run(clear_postuplenie('28ORA-E660518'))
     # data = asyncio.run(get_finalized_doc(2))
     # print(data)
-    for d in data:
-        print(d[0])
+    # for d in data:
+    #     print(d[0])
     # asyncio.run(clear_postuplenie(d[0]))
     # asyncio.run(permitdel())
     # asyncio.run(read_request_sm('23fa886b-4aea-4b12-a697-9e6cb8d0f7df'))
