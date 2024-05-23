@@ -1,5 +1,5 @@
 # Clevrence api connections
-cv_api_server = '192.168.0.123'
+cv_api_server = '192.168.0.166'
 cv_api_server_port = '9000'
 
 # Supermag api connections
