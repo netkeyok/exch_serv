@@ -19,6 +19,7 @@ class DocumentItem(BaseModel):
     productBarcode: Optional[str] = Field(None, write_only=True)
     packingName: Optional[str] = Field(None, write_only=True)
     cena: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    CenaPriemki: Optional[float] = None
     priceTotal: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
     bindedLineUid: Optional[str] = None
     idEdinicyIzmereniya: Optional[str] = None

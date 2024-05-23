@@ -28,11 +28,11 @@ async def get_request(url, js_data=None):
 
 async def get_mesabbrev(article):
     url = f'{smcard_sm_url}{article}'
-    data = await get_request(url)
-    dictionary = json.loads(data)
+    request_data = await get_request(url)
+    dictionary = json.loads(request_data)
     data_model = USIOMESABBREVINFO.DataModel(**dictionary)
-    for data in data_model:
-        mesabbrev = data[1].POSTOBJECT[0].IOUSIOMESABBREVINFO.USIOMESABBREVINFO[0].MESABBREV
+    for js_data in data_model:
+        mesabbrev = js_data[1].POSTOBJECT[0].IOUSIOMESABBREVINFO.USIOMESABBREVINFO[0].MESABBREV
         return mesabbrev
 
 

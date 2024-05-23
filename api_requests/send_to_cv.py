@@ -13,7 +13,7 @@ from api_models.Cleverence.Contragents import Contragent
 from api_models.Cleverence.Warehouse import Warehouse
 from api_models.Supermag import IOSMIOSTORELOCATIONS, IOUSIOSMCONTRAGENT, OR
 from api_requests.get_from_sm import get_request, get_mesabbrev
-from db_connections.oramodels import SMStoreUnits, SMCard, SMClientInfo, SMDocuments, SMStoreLocations, SMSpecor
+from db_connections.oramodels import SMStoreUnits, SMCard
 from db_connections.db_conf import session
 from config_urls import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent, \
     header, storelocs_sm_url, contragents_sm_url
@@ -77,7 +77,6 @@ async def read_request_sm(ticket):
 
 async def load_card(article):
     # Загрузка карточки на сервер Клеверенс
-
     # Получаем данные из базы
     full_request = select(
         SMCard.article,
@@ -157,37 +156,6 @@ async def load_card(article):
     await send_request(products_url, product_json)
 
 
-# async def load_contragents():
-#     # Загрузка справочника контрагентов в Клеверенс
-#
-#     await send_request(begin_contragent, None)
-#     query = select(SMClientInfo.id,
-#                    SMClientInfo.name,
-#                    SMClientInfo.inn).where(SMClientInfo.accepted == '1')
-#     result = session.execute(query)
-#
-#     dict_iterator = result.mappings()
-#
-#     # Получаем список словарей
-#     results = list(dict_iterator)
-#     for data in results:
-#         # print(data)
-#
-#         contragents = Contragent(
-#             uid=str(data['id']),
-#             naimenovanie=data['name'],
-#             etoPapka=False,
-#             iNN=data['inn'],
-#             naimenovanieDlyaPoiska=data['name'],
-#             id=str(data['id'])
-#         )
-#
-#         contragents_json = contragents.model_dump_json(exclude_none=True)
-#         print(contragents_json)
-#         # Отправляем данные на сервер.
-#         await send_request(contragents_url, contragents_json)
-#     session.close()
-#     await send_request(end_contragent, None)
 async def send_contragents():
     await send_request(begin_contragent, None)
     data_request = await get_request(contragents_sm_url)
@@ -242,87 +210,6 @@ async def send_articles():
     return f'Загружено {counter} SKU'
 
 
-# Отправка документов на сервер.
-# async def send_postuplenie(docid=None):
-#     # Загрузка документов поступление в Клеверенс, если не установлен номер документа, грузятся все документы,
-#     # которые соотвествуют условию отбора
-#
-#     # Фильтр по дате, при загрузке всех документов.
-#     days_ago = datetime.now() - timedelta(days=2)
-#     # Если указан номер документа, то грузим строго по номеру. Номер получаем по API от СМ.
-#     if docid:
-#         query = (
-#             select(SMDocuments.ID,
-#                    SMDocuments.LOCATION,
-#                    SMDocuments.CREATEDAT,
-#                    SMDocuments.CLIENTINDEX,
-#                    SMDocuments.TOTALSUM)
-#             .where(SMDocuments.ID == docid)
-#         )
-#     else:
-#         query = (
-#             select(SMDocuments.ID,
-#                    SMDocuments.LOCATION,
-#                    SMDocuments.CREATEDAT,
-#                    SMDocuments.CLIENTINDEX,
-#                    SMDocuments.TOTALSUM)
-#             .where(SMDocuments.DOCTYPE.in_(['OR']),
-#                    SMDocuments.DOCSTATE.in_(['2']),
-#                    SMDocuments.CREATEDAT.between(days_ago, datetime.now())
-#                    )
-#         )
-#     result = session.execute(query)
-#     dict_iterator = result.mappings()
-#
-#     # Получаем список словарей
-#     results = list(dict_iterator)
-#
-#     # проходим по списку и отправляем на сервер.
-#     for result in results:
-#         original_datetime = result['CREATEDAT']
-#         # Преобразование в нужный формат
-#         formatted_datetime = original_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
-#         timezone_info = datetime.now(timezone.utc).astimezone().strftime("%z")
-#         formatted_datetime_with_timezone = f"{formatted_datetime}{timezone_info}"
-#         items = await send_postuplenie_items(result['ID'])
-#         doc = Postuplenie(
-#             id=result['ID'],
-#             name=f"Прием ТСД по заказу: {result['ID']}",
-#             createDate=formatted_datetime_with_timezone,
-#             warehouseId=str(result['LOCATION']),
-#             idKontragenta=str(result['CLIENTINDEX']),
-#             summaDokumenta=result['TOTALSUM'],
-#             declaredItems=items
-#         )
-#         postuplenie_json = doc.model_dump_json(exclude_none=True)
-#         # print(postuplenie_json)
-#         await send_request(postuplenie_url, postuplenie_json)
-
-
-# async def send_storeloc():
-#     # Загрузка справочников мест хранения в Клеверенс
-#     query = (
-#         select(SMStoreLocations.ID,
-#                SMStoreLocations.NAME,
-#                )
-#         .where(SMStoreLocations.ACCEPTED == 1)
-#     )
-#     result = session.execute(query)
-#     dict_iterator = result.mappings()
-#
-#     # Получаем список словарей
-#     results = list(dict_iterator)
-#
-#     for result in results:
-#         print(result)
-#         warehouse = Warehouse(
-#             storageId=str(result['ID']),
-#             id=str(result['ID']),
-#             name=result['NAME']
-#         )
-#         warehouse_json = warehouse.model_dump_json(exclude_none=True)
-#         await send_request(warehouse_url, warehouse_json)
-
 async def send_storeloc():
     data_request = await get_request(storelocs_sm_url)
     dictionary = json.loads(data_request)
@@ -342,6 +229,7 @@ async def send_storeloc():
 
 
 async def clear_postuplenie(doc_id):
+    print(doc_id)
     async with aiohttp.ClientSession() as sessionapi:
         try:
             del_url_with_id = f'{postuplenie_url}({doc_id})'
@@ -352,60 +240,8 @@ async def clear_postuplenie(doc_id):
     await sessionapi.close()
 
 
-# async def send_postuplenie_items(docid):
-#     # Формирование списка позиций накладной
-#     query = (
-#         select(SMSpecor.ARTICLE,
-#                SMSpecor.SPECITEM,
-#                SMSpecor.DISPLAYITEM,
-#                SMSpecor.QUANTITY,
-#                SMSpecor.ITEMPRICE,
-#                SMSpecor.TOTALPRICE
-#                )
-#         .where(SMSpecor.DOCID == docid)
-#     )
-#     result = session.execute(query)
-#     dict_iterator = result.mappings()
-#
-#     # Получаем список словарей
-#     results = list(dict_iterator)
-#     spec_list = []
-#     for result in results:
-#         spec_items = DocumentItem(
-#             uid=str(result['SPECITEM']),
-#             productId=result['ARTICLE'],
-#             declaredQuantity=result['QUANTITY'],
-#             price=result['ITEMPRICE'],
-#             priceTotal=result['TOTALPRICE']
-#         )
-#         spec_list.append(spec_items)
-#     return spec_list
-
-
-# async def get_finalized_doc():
-#     # Получить список документов завершенных на ТСД
-#     async with aiohttp.ClientSession() as sessionapi:
-#         # Отправляем POST-запрос с JSON-данными на сервер api с помощью асинхронного менеджера контекста
-#         async with sessionapi.get(postuplenie_url, headers=header) as response:
-#             # Получаем кодировку, статус и текст ответа асинхронно с помощью await
-#             status = response.status
-#             data_js = await response.json()
-#             data_list = data_js['value']
-#             for data in data_list:
-#                 doclist = Postuplenie(**data)
-# #                 if doclist.finished:
-#                 print(doclist.id, doclist.createDate)
-#                 # print(f"{postuplenie_url}('{doclist.id}')/declaredItems")
-#             print(status)
-#             # Проверяем статус ответа и выводим результат
-#             if status not in (200,):
-#                 print('Произошла ошибка при запросе на сервер')
-#                 print(status)
-#                 print(response)
-
-
 # Используется в асинхронной функции для получения недавних документов
-async def get_finalized_doc(days: int):
+async def get_docs_of_dates(days: int):
     docs_list = []
     async with aiohttp.ClientSession() as sessionapi:
         async with sessionapi.get(postuplenie_url, headers=header) as response:
@@ -428,11 +264,21 @@ async def get_finalized_doc(days: int):
     return docs_list
 
 
+async def clear_old_docs(days):
+    docs_id = await get_docs_of_dates(days)
+    count = 0
+    for doc in docs_id:
+        await clear_postuplenie(doc[0])
+        count += 1
+    return f'Очищено {count} документов'
+
+
 async def send_or_to_cv(doc_dict):
     data = OR.Data(**doc_dict)
     # получаем список постобъектов
     # print(data)
     postobjects = data.PACKAGE.POSTOBJECT
+    doc_list = []
     for postobject in postobjects:
         docdata = postobject.OR.SMDOCUMENTS[0]
         docitems = postobject.OR.SMSPECOR
@@ -453,10 +299,11 @@ async def send_or_to_cv(doc_dict):
                 idEdinicyIzmereniya=mesabbr,
                 packingId=mesabbr,
                 cena=items.ITEMPRICE,
-                priceTotal=items.TOTALPRICE
+                CenaPriemki=items.ITEMPRICE,
+                # priceTotal=items.TOTALPRICE
             )
             spec_list.append(spec_items)
-
+        doc_list.append(docdata.ID)
         # Получаем шапку документа
         doc = Postuplenie(
             id=docdata.ID,
@@ -470,20 +317,27 @@ async def send_or_to_cv(doc_dict):
         )
         postuplenie_json = doc.model_dump_json(exclude_none=True)
         await send_request(postuplenie_url, postuplenie_json)
+    if doc_list:
+        return doc_list
+    else:
+        return 'nothing'
 
 
 if __name__ == '__main__':
     # asyncio.run(load_card('014073'))
-    asyncio.run(send_articles())
+    # asyncio.run(send_articles())
+    data = asyncio.run(get_finalized_doc(2))
+    # print(data)
+
     # asyncio.run(send_contragents())
     # asyncio.run(send_postuplenie('7ORA-E643252'))
     # asyncio.run(send_storeloc())
     # asyncio.run(clear_postuplenie('28ORA-E660518'))
     # data = asyncio.run(get_finalized_doc(2))
     # print(data)
-    # for d in data:
-    #     print(d[0])
-        # asyncio.run(clear_postuplenie(d[0]))
+    for d in data:
+        print(d[0])
+    # asyncio.run(clear_postuplenie(d[0]))
     # asyncio.run(permitdel())
     # asyncio.run(read_request_sm('23fa886b-4aea-4b12-a697-9e6cb8d0f7df'))
     pass

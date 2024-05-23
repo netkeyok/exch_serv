@@ -2,8 +2,9 @@ from fastapi import FastAPI, File
 from fastapi.responses import JSONResponse
 import json
 from cm_datamining import parse_ui, parse_wi, parse_rl
-from api_requests.Send_to_CV import clear_postuplenie, send_articles, send_or_to_cv
-from db_connections.Get_from_SM import get_card
+from api_requests.send_to_cv import clear_postuplenie, send_articles, send_or_to_cv, clear_old_docs
+from db_connections.get_from_sm import get_card
+from tasks.tasks import start_send_articles
 
 app = FastAPI()
 
@@ -30,8 +31,8 @@ async def upload_data(file: bytes = File()):
         print('end')
     elif 'OR' in docdict[0].keys():
         print('start receiving OR')
-        await send_or_to_cv(dictionary)
-        print('end receiving OR')
+        doc_list = await send_or_to_cv(dictionary)
+        print(f'end receiving OR, sended {doc_list}')
     else:
         print('---------------------------------------')
         print(docdict[0].keys())
@@ -40,20 +41,37 @@ async def upload_data(file: bytes = File()):
 
 
 @app.post("/v1/func/clear")
-async def clear_docs(days):
-    await clear_postuplenie(days)
-    return 'Ok'
+async def clear_docs(days: int):
+    answer = await clear_old_docs(days)
+    return answer
 
 
 @app.get("/v1/get_card")
-async def get_SMcard(bar: str):
+async def get_sm_card(bar: str):
     result = get_card(bar)
     # Предполагаем, что result - это список кортежей
 
     return JSONResponse(content=result)
 
 
+# @app.post("/v1/func/send_sku")
+# async def send_sku():
+#     result = await send_articles()
+#     return result
 @app.post("/v1/func/send_sku")
 async def send_sku():
-    result = await send_articles()
-    return result
+    # Отправляем задачу в очередь на выполнение через Celery, не ожидаем ее завершения
+    task = start_send_articles.delay()
+    # Возвращаем идентификатор задачи клиенту
+    return {"task_id": task.id}
+
+
+@app.get("/v1/func/task_status/{task_id}")
+async def get_task_status(task_id: str):
+    # Получаем статус задачи по ее ID
+    task_result = start_send_articles.AsyncResult(task_id)
+    return {
+        "task_id": task_id,
+        "status": task_result.status,
+        "result": task_result.result
+    }
