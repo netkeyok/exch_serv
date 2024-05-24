@@ -332,7 +332,7 @@ if __name__ == '__main__':
     # data = asyncio.run(get_finalized_doc(2))
     # print(data)
 
-    # asyncio.run(send_contragents())
+    asyncio.run(send_contragents())
     # asyncio.run(send_postuplenie('7ORA-E643252'))
     # asyncio.run(send_storeloc())
     # asyncio.run(clear_postuplenie('28ORA-E660518'))

@@ -133,7 +133,7 @@ async def get_wi_items(or_id, wi_id):
             for data in data_list:
                 spec_id += 1
                 docitems = DocumentItem(**data)
-                result_id = spec_id if docitems.nomerStrokiDokumenta == 0 else docitems.nomerStrokiDokumenta
+                result_id = spec_id if not docitems.nomerStrokiDokumenta else docitems.nomerStrokiDokumenta
                 string_summa = docitems.currentQuantity * docitems.cena
                 summa_doc.append(string_summa)
                 smspec = SMSpec(
