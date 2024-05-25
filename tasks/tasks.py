@@ -28,8 +28,7 @@ celery_app.conf.beat_schedule = {
 
 @celery_app.task
 def start_send_docs():
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(send_wi())
+    result = asyncio.run(send_wi())
     return result
 
 
@@ -41,6 +40,5 @@ def start_send_articles():
 
 @celery_app.task
 def task_clear_old_docs():
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(clear_old_docs(3))
+    result = asyncio.run(clear_old_docs(3))
     return result

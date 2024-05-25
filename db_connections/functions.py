@@ -30,14 +30,6 @@ def generate_number(mx_id):
     return new_number
 
 
-# def mxid_to_postid(mx_id):
-#     with session.begin():
-#         post_id = (
-#             session.query(SMPostLocMap.DBASEID).where(SMPostLocMap.STORELOC == mx_id).scalar())
-#         resilt = post_id
-#         print(resilt)
-
-
 def send_post(mx_id, doc_id):
     with session.begin():
         raw_sql = text("select supermag.SMPostQueueSeq.NEXTVAL from dual")
