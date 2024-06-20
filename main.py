@@ -2,7 +2,7 @@ from fastapi import FastAPI, File
 from fastapi.responses import JSONResponse
 import json
 from cm_datamining import parse_ui, parse_wi, parse_rl
-from api_requests.send_to_cv import clear_postuplenie, send_articles, send_or_to_cv, clear_old_docs
+from api_requests.send_to_cv import send_or_to_cv, clear_old_docs
 from db_connections.get_from_sm import get_card
 from tasks.tasks import start_send_articles
 
@@ -31,11 +31,13 @@ async def upload_data(file: bytes = File()):
         print('end')
     elif 'OR' in docdict[0].keys():
         print('start receiving OR')
+        # print(dictionary)
         doc_list = await send_or_to_cv(dictionary)
+
         print(f'end receiving OR, sended {doc_list}')
     else:
         print('---------------------------------------')
-        print(docdict[0].keys())
+        # print(docdict[0].keys())
         print('wrong data!!!')
         print(docdict)
 
@@ -54,10 +56,6 @@ async def get_sm_card(bar: str):
     return JSONResponse(content=result)
 
 
-# @app.post("/v1/func/send_sku")
-# async def send_sku():
-#     result = await send_articles()
-#     return result
 @app.post("/v1/func/send_sku")
 async def send_sku():
     # Отправляем задачу в очередь на выполнение через Celery, не ожидаем ее завершения

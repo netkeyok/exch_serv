@@ -3,7 +3,14 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 
-class SMSPECOR(BaseModel):
+class SmDocProps(BaseModel):
+    DOCID: str
+    DOCTYPE: str
+    PARAMNAME: str
+    PARAMVALUE: str
+
+
+class SmSpecOr(BaseModel):
     DOCID: str
     DOCTYPE: str
     SPECITEM: int
@@ -13,25 +20,25 @@ class SMSPECOR(BaseModel):
     ITEMPRICECUR: float
     QUANTITY: float
     SUGGESTQUANTITY: float = Field(default=0.0)
-    TOTALPRICE: float
-    TOTALPRICECUR: float
+    TOTALPRICE: float | None = None
+    TOTALPRICECUR: float | None = None
 
 
-class SMDOCOR(BaseModel):
+class SmDocOr(BaseModel):
     ID: str
     DOCTYPE: str = Field(default="OR")
     CLIENTCOMMENTARY: Optional[str] = None
     COMMENTARY: Optional[str] = None
     CROSSLOCATION: Optional[int] = None
-    ORDERDATE: datetime
-    OURSELFCLIENT: int
+    ORDERDATE: Optional[datetime]
+    OURSELFCLIENT: Optional[int] = None
     SUPPLYDATE: str | None = None
     SUPPLYTIME: int = Field(default=0)
     SUPPLYTIMETILL: int = Field(default=1439)
     USEFORAUTOGEN: str = Field(default="1")
 
 
-class SMDOCUMENTS(BaseModel):
+class SmDocuments(BaseModel):
     ID: str
     DOCTYPE: str
     BORNIN: str
@@ -48,27 +55,28 @@ class SMDOCUMENTS(BaseModel):
     LOCATIONTO: Optional[int] = None
     OPCODE: int
     PRICEROUNDMODE: int
-    TOTALSUM: float
-    TOTALSUMCUR: float
+    TOTALSUM: Optional[float] = None
+    TOTALSUMCUR: Optional[float] = None
     USEROP: Optional[int] = None
 
 
-class OR(BaseModel):
-    SMDOCUMENTS: List[SMDOCUMENTS]
-    SMDOCOR: List[SMDOCOR]
-    SMSPECOR: List[SMSPECOR]
+class Or(BaseModel):
+    SMDOCUMENTS: List[SmDocuments]
+    SMDOCOR: List[SmDocOr]
+    SMSPECOR: List[SmSpecOr]
+    SMDOCPROPS: Optional[List[SmDocProps]] = None
 
 
-class POSTOBJECT(BaseModel):
+class PostObject(BaseModel):
     description: str
     action: str
     Id: str
-    OR: OR
+    OR: Or
 
 
 class Package(BaseModel):
     name: str
-    POSTOBJECT: List[POSTOBJECT]
+    POSTOBJECT: List[PostObject]
 
 
 class Data(BaseModel):

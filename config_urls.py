@@ -1,5 +1,5 @@
 # Clevrence api connections
-cv_api_server = '192.168.0.166'
+cv_api_server = '192.168.0.123'
 cv_api_server_port = '9000'
 
 # Supermag api connections
@@ -26,7 +26,11 @@ end_contragent = f'{cleverence_url}Tables/Kontragenty/EndUpdate'
 
 # Раздел загрузки поставок
 postuplenie_url = f'{cleverence_url}Docs/Postuplenie'
+PostuplenieRuchnoe = f'{cleverence_url}Docs/PostuplenieRuchnoe'
 postupleniebaza_url = f'{cleverence_url}Docs/PostuplenieBaza'
+postupleniebaza_url = f'{cleverence_url}Docs/PostuplenieBaza'
+
+
 
 
 # Раздел загрузки складов.(МХ в Супермаге)

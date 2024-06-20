@@ -3,7 +3,7 @@ import asyncio
 from celery import Celery
 from celery.schedules import crontab
 
-from api_requests.send_to_cv import send_articles, clear_postuplenie, clear_old_docs
+from api_requests.send_to_cv import send_articles, clear_old_docs
 from db_connections.db_conf import REDIS_HOST, REDIS_PASS
 from api_requests.send_to_sm import send_wi
 
