@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: web_app
+    ports:
+      - "8083:8083"
+    volumes:
+      - .:/app
+      - ./env_files/.env:/app/.env:ro  # Монтирование файла .env как только для чтения
+    command: ["supervisord", "-c", "supervisord.conf"]
+
+  worker:
+    build: .
+    container_name: celery_worker
+    depends_on:
+      - web
+    volumes:
+      - .:/app
+      - ./env_files/.env:/app/.env:ro  # Монтирование файла .env как только для чтения
+    command: celery -A tasks.tasks:celery_app worker --loglevel=INFO
+
+  flower:
+    build: .
+    container_name: flower
+    ports:
+      - "5556:5556"
+    depends_on:
+      - worker
+    volumes:
+      - .:/app
+      - ./env_files/.env:/app/.env:ro  # Монтирование файла .env как только для чтения
+    command: celery -A tasks.tasks:celery_app flower --port=5556
+
+  beat:
+    build: .
+    container_name: celery_beat
+    depends_on:
+      - worker
+    volumes:
+      - .:/app
+      - ./env_files/.env:/app/.env:ro  # Монтирование файла .env как только для чтения
+    command: celery -A tasks.tasks beat -l INFO
