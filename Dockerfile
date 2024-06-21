@@ -2,22 +2,30 @@
 FROM ghcr.io/oracle/oraclelinux:8
 
 ARG release=19
-ARG update=19
+ARG update=21
 
-# Установка необходимых пакетов
+# Установка Python и необходимых пакетов
 RUN dnf -y install \
     python3.11 python3.11-pip python3.11-setuptools python3.11-wheel \
-    oracle-release-el8 \
-    oracle-instantclient${release}.${update}-basic oracle-instantclient${release}.${update}-devel oracle-instantclient${release}.${update}-sqlplus \
-    epel-release supervisor && \
+    epel-release && \
     rm -rf /var/cache/dnf
 
 # Установка переменных окружения для Oracle Instant Client
-ENV ORACLE_HOME=/usr/lib/oracle/19.19/client64
+ENV ORACLE_HOME=/usr/lib/oracle/${release}.${update}/client64
 ENV LD_LIBRARY_PATH=$ORACLE_HOME/lib
 ENV PATH=$PATH:$ORACLE_HOME/bin
 ENV FLOWER_TIMEZONE=Asia/Yekaterinburg
 ENV PYTHONUNBUFFERED=1
+
+# Копирование и установка Oracle Instant Client из локальных RPM-файлов
+COPY OraCliInstall/oracle-instantclient${release}.${update}-basic-*.rpm /tmp/
+COPY OraCliInstall/oracle-instantclient${release}.${update}-devel-*.rpm /tmp/
+COPY OraCliInstall/oracle-instantclient${release}.${update}-sqlplus-*.rpm /tmp/
+RUN dnf -y localinstall /tmp/oracle-instantclient${release}.${update}-basic-*.rpm /tmp/oracle-instantclient${release}.${update}-devel-*.rpm /tmp/oracle-instantclient${release}.${update}-sqlplus-*.rpm && \
+    rm -f /tmp/*.rpm
+
+# Установка supervisord через pip
+RUN pip3 install supervisor
 
 # Копирование файлов проекта в контейнер
 COPY . .
