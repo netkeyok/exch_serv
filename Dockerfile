@@ -2,7 +2,7 @@
 FROM ghcr.io/oracle/oraclelinux:8
 
 ARG release=19
-ARG update=21
+ARG update=23
 
 # Установка необходимых пакетов
 RUN dnf -y install \
@@ -13,7 +13,7 @@ RUN dnf -y install \
     rm -rf /var/cache/dnf
 
 # Установка переменных окружения для Oracle Instant Client
-ENV ORACLE_HOME=/usr/lib/oracle/19.21/client64
+ENV ORACLE_HOME=/usr/lib/oracle/19.23/client64
 ENV LD_LIBRARY_PATH=$ORACLE_HOME/lib
 ENV PATH=$PATH:$ORACLE_HOME/bin
 ENV FLOWER_TIMEZONE=Asia/Yekaterinburg
