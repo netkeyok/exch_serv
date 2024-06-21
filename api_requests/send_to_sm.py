@@ -194,7 +194,6 @@ async def send_wi():
 
                 # print(data_json)
                 text = await post_request(supermag_in_url, data_json)
-                print(data_json, text)
                 if text:
                     ticket = ET.fromstring(text)
                     ticket_id = ticket.find('ticketId').text
