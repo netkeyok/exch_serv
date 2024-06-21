@@ -6,7 +6,7 @@ ARG update=21
 
 # Установка необходимых пакетов
 RUN dnf -y install \
-    python3.12 python3.11-pip python3.11-setuptools python3.11-wheel \
+    python3.11 python3.11-pip python3.11-setuptools python3.11-wheel \
     oracle-release-el8 \
     oracle-instantclient${release}.${update}-basic oracle-instantclient${release}.${update}-devel oracle-instantclient${release}.${update}-sqlplus \
     epel-release supervisor && \
