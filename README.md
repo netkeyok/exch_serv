@@ -31,4 +31,4 @@ ORACLE_BASE=Название базы данных
 
 
 Запуск контейнера при помощи команды:
-docker build . --tag exch_server --no-cache && docker run --name exch_server -p 8083:8083 -p 5556:5556 --env-file ./.env exch_server
+docker build . --tag exch_server2 --no-cache && docker run --name exch_server2 -p 8083:8083 -p 5556:5556 --env-file ./.env exch_server2

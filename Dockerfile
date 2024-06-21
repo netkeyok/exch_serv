@@ -6,7 +6,7 @@ ARG update=21
 
 # Установка необходимых пакетов
 RUN dnf -y install \
-    python3.12 python3.12-pip python3.12-setuptools python3.12-wheel \
+    python3.12 python3.11-pip python3.11-setuptools python3.11-wheel \
     oracle-release-el8 \
     oracle-instantclient${release}.${update}-basic oracle-instantclient${release}.${update}-devel oracle-instantclient${release}.${update}-sqlplus \
     epel-release supervisor && \
@@ -23,11 +23,11 @@ ENV PYTHONUNBUFFERED=1
 COPY . .
 
 # Обновление pip и установка зависимостей
-RUN python3.12 -m pip install --upgrade pip && \
+RUN python3.11 -m pip install --upgrade pip && \
     pip3 install -r requirements.txt
 
 # Настройка Python 3.11 как версии по умолчанию для python3
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 # Настройка прав на файл supervisord.conf
 RUN chmod 644 /supervisord.conf
