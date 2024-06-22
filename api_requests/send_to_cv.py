@@ -1,4 +1,5 @@
 # import asyncio
+import asyncio
 import json
 
 from collections import defaultdict
@@ -9,13 +10,15 @@ from sqlalchemy import select, exists
 
 from api_models.Cleverence.Products import Product
 from api_models.Cleverence.Contragents import Contragent
+from api_models.Cleverence.Tables_SpisokDokumentov import SpisokDokumentov
 from api_models.Cleverence.Warehouse import Warehouse
 from api_models.Supermag import IOSMIOSTORELOCATIONS, IOUSIOSMCONTRAGENT, OR
 from api_requests.get_from_sm import get_request, get_mesabbrev
 from db_connections.oramodels import SMStoreUnits, SMCard
 from db_connections.db_conf import session
 from config_urls import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent, \
-    storelocs_sm_url, contragents_sm_url
+    storelocs_sm_url, contragents_sm_url, begin_tables_spisokdokumentov, tables_spisokdokumentov, \
+    end_tables_spisokdokumentov
 from config_urls import postuplenie_url, warehouse_url
 
 from api_models.Cleverence.Postuplenie import Postuplenie, DocumentItem
@@ -106,7 +109,7 @@ async def load_card(article):
 
 
 async def send_contragents():
-    await post_request(begin_contragent, None)
+    await post_request(begin_contragent)
     url = contragents_sm_url
     data_request = await get_request(url)
     if 'data_text' in data_request:
@@ -130,7 +133,7 @@ async def send_contragents():
                 contragents_json = contragents.model_dump_json(exclude_none=True)
                 # Отправляем данные на сервер.
                 await post_request(contragents_url, contragents_json)
-        await post_request(end_contragent, None)
+        await post_request(end_contragent)
         return f"Загружено {count} контрагентов"
 
 
@@ -141,7 +144,7 @@ async def send_articles():
     print('Начало загрузки данных')
 
     # Передаем на сервер запрос на обновление справочника
-    await post_request(begin_product, None)
+    await post_request(begin_product)
 
     # получаем список всех article, удовлетворяющих условиям
     query = select(SMCard.article).where(SMCard.receiptok == 1,
@@ -153,7 +156,7 @@ async def send_articles():
     for article in cards:
         counter += 1
         await load_card(article[0])
-    await post_request(end_product, None)
+    await post_request(end_product)
 
     # Замеряем время загрузки
     end_time = time.time()
@@ -293,6 +296,19 @@ async def send_or_to_cv(doc_dict):
         )
         postuplenie_json = doc.model_dump_json(exclude_none=True)
         await post_request(postuplenie_url, postuplenie_json)
+        spisokdok = SpisokDokumentov(
+            uid=docdata.ID,
+            docdate=formatted_datetime_with_timezone,
+            docType="Postuplenie",
+            docBarcode=docprops,
+            idKontragenta=str(docdata.CLIENTINDEX),
+            summaDokumenta=docdata.TOTALSUM,
+            warehouseId=str(docdata.LOCATION),
+        )
+        spisokdokumentov_json = spisokdok.model_dump_json(exclude_none=True)
+        await post_request(begin_tables_spisokdokumentov)
+        await post_request(tables_spisokdokumentov, spisokdokumentov_json)
+        await post_request(end_tables_spisokdokumentov)
     if doc_list:
         return doc_list
     else:
@@ -300,4 +316,4 @@ async def send_or_to_cv(doc_dict):
 
 
 if __name__ == '__main__':
-    pass
+    asyncio.run(send_articles())

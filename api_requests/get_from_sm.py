@@ -10,9 +10,7 @@ async def get_mesabbrev(article):
     url = f'{smcard_sm_url}{article}'
     data_request = await get_request(url)
     if 'data_text' in data_request:
-        # print(data_request[1])
         dictionary = json.loads(data_request[1])
-        print(dictionary)
         data_model = USIOMESABBREVINFO.DataModel(**dictionary)
         for js_data in data_model:
             mesabbrev = js_data[1].POSTOBJECT[0].IOUSIOMESABBREVINFO.USIOMESABBREVINFO[0].MESABBREV

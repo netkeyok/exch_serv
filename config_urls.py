@@ -12,7 +12,6 @@ header = {'Content-Type': 'application/json'}
 # Clevrense urls
 cleverence_url = f'http://{cv_api_server}:{cv_api_server_port}/MobileSMARTS/api/v1/'
 
-
 # Раздел карточек
 products_url = f'{cleverence_url}Products'
 begin_product = f'{cleverence_url}Products/BeginUpdate'
@@ -23,15 +22,16 @@ contragents_url = f'{cleverence_url}Tables/Kontragenty'
 begin_contragent = f'{cleverence_url}Tables/Kontragenty/BeginUpdate'
 end_contragent = f'{cleverence_url}Tables/Kontragenty/EndUpdate'
 
+# Раздел таблицы
+begin_tables_spisokdokumentov = f'{cleverence_url}Tables/SpisokDokumentov/BeginUpdate'
+tables_spisokdokumentov = f'{cleverence_url}Tables/SpisokDokumentov/'
+end_tables_spisokdokumentov = f'{cleverence_url}Tables/SpisokDokumentov/EndUpdate'
 
 # Раздел загрузки поставок
 postuplenie_url = f'{cleverence_url}Docs/Postuplenie'
 PostuplenieRuchnoe = f'{cleverence_url}Docs/PostuplenieRuchnoe'
 postupleniebaza_url = f'{cleverence_url}Docs/PostuplenieBaza'
 postupleniebaza_url = f'{cleverence_url}Docs/PostuplenieBaza'
-
-
-
 
 # Раздел загрузки складов.(МХ в Супермаге)
 warehouse_url = f'{cleverence_url}Warehouses'

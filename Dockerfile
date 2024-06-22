@@ -4,41 +4,40 @@ FROM ghcr.io/oracle/oraclelinux:8
 ARG release=19
 ARG update=21
 
-# Установка Python и необходимых пакетов
+# Установка необходимых пакетов
 RUN dnf -y install \
     python3.11 python3.11-pip python3.11-setuptools python3.11-wheel \
     epel-release && \
     rm -rf /var/cache/dnf
 
+# Установка Oracle Instant Client из локальной папки
+COPY OraCliInstall/oracle-instantclient${release}.${update}-*.rpm /tmp/
+RUN dnf -y localinstall /tmp/oracle-instantclient${release}.${update}-*.rpm && \
+    rm -rf /var/cache/dnf /tmp/oracle-instantclient${release}.${update}-*.rpm
+
 # Установка переменных окружения для Oracle Instant Client
-ENV ORACLE_HOME=/usr/lib/oracle/${release}.${update}/client64
+ENV ORACLE_HOME=/usr/lib/oracle/19.21/client64
 ENV LD_LIBRARY_PATH=$ORACLE_HOME/lib
 ENV PATH=$PATH:$ORACLE_HOME/bin
 ENV FLOWER_TIMEZONE=Asia/Yekaterinburg
 ENV PYTHONUNBUFFERED=1
 
-# Копирование и установка Oracle Instant Client из локальных RPM-файлов
-COPY OraCliInstall/oracle-instantclient${release}.${update}-basic-*.rpm /tmp/
-COPY OraCliInstall/oracle-instantclient${release}.${update}-devel-*.rpm /tmp/
-COPY OraCliInstall/oracle-instantclient${release}.${update}-sqlplus-*.rpm /tmp/
-RUN dnf -y localinstall /tmp/oracle-instantclient${release}.${update}-basic-*.rpm /tmp/oracle-instantclient${release}.${update}-devel-*.rpm /tmp/oracle-instantclient${release}.${update}-sqlplus-*.rpm && \
-    rm -f /tmp/*.rpm
-
-# Установка supervisord через pip
-RUN pip3 install supervisor
-
 # Копирование файлов проекта в контейнер
-COPY . .
+COPY . /app
+WORKDIR /app
 
 # Обновление pip и установка зависимостей
 RUN python3.11 -m pip install --upgrade pip && \
     pip3 install -r requirements.txt
 
-# Настройка Python 3.11 как версии по умолчанию для python3
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+# Установка Supervisor
+RUN dnf -y install supervisor
 
-# Настройка прав на файл supervisord.conf
-RUN chmod 644 /supervisord.conf
+# Копирование конфигурации Supervisor
+COPY supervisord.conf /etc/supervisord.conf
 
-# Команды, выполняемые при запуске контейнера
-CMD ["supervisord", "-c", "supervisord.conf"]
+# Разрешения на файл конфигурации Supervisor
+RUN chmod 644 /etc/supervisord.conf
+
+# Команды для запуска контейнера
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

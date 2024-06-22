@@ -3,7 +3,7 @@ import aiohttp
 from config_urls import header, ticket_url
 
 
-async def post_request(url, js_data):
+async def post_request(url, js_data=None):
     # асинхронная функция для отправки запроса на сервер api
 
     # Создаем сессию клиента с помощью асинхронного менеджера контекста

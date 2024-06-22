@@ -1,42 +1,42 @@
 
 
 
-async def send_wi():
-    print("Start sending WI")
-    # result = 'Nothing to send'
-    data_request = await get_request(postuplenie_url)
-    if 'data_json' in data_request:
-        for data_js in data_request[1]["value"]:
-            doclist = Postuplenie(**data_js)
-            print(doclist)
-
-        # data_list = data_js['value']
-        # for data in data_list:
-        #     doclist = Postuplenie(**data)
-        #     print(doclist)
-    # return result
-
-
-async def get_docs_of_dates(days: int):
-    docs_list = []
-    data_request = await get_request(postuplenie_url)
-    if 'data_json' in data_request:
-        # Создание осведомлённого объекта datetime по GMT+5
-        gmt_plus_five = timezone(timedelta(hours=5))
-        cutoff_date = datetime.now(gmt_plus_five) - timedelta(days=days)
-        for data in data_request[1]['value']:
-            doclist = Postuplenie(**data)
-            # Проверка, что createDate в формате datetime с tzinfo
-            # Если createDate меньше или равно дате отсечки, добавляем в список
-            if doclist.createDate <= cutoff_date:
-                docs_list.append((doclist.id, doclist.createDate))
-            else:
-                print('Произошла ошибка при запросе на сервер')
-    return docs_list
-
+async def send_spisok_doc(doc_dict):
+    data = OR.Data(**doc_dict)
+    # получаем список постобъектов
+    # print(data)
+    postobjects = data.PACKAGE.POSTOBJECT
+    doc_list = []
+    for postobject in postobjects:
+        docdata = postobject.OR.SMDOCUMENTS[0]
+        original_datetime = postobject.OR.SMDOCUMENTS[0].CREATEDAT
+        docprops = (postobject.OR.SMDOCPROPS[0].PARAMVALUE or []) if postobject.OR.SMDOCPROPS else None
+        formatted_datetime = original_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        timezone_info = datetime.now(timezone.utc).astimezone().strftime("%z")
+        formatted_datetime_with_timezone = f"{formatted_datetime}{timezone_info}"
+        # Получаем строки документа
+        doc_list.append(docdata.ID)
+        # Получаем шапку документа
+        spisokdok = SpisokDokumentov(
+            uid=docdata.ID,
+            docdate=formatted_datetime_with_timezone,
+            docType="Postuplenie",
+            docBarcode=docprops,
+            idKontragenta=str(docdata.CLIENTINDEX),
+            summaDokumenta=docdata.TOTALSUM,
+            warehouseId=str(docdata.LOCATION),
+        )
+        spisokdokumentov_json = spisokdok.model_dump_json(exclude_none=True)
+        await post_request(begin_tables_spisokdokumentov)
+        await post_request(tables_spisokdokumentov, spisokdokumentov_json)
+        await post_request(end_tables_spisokdokumentov)
+    if doc_list:
+        return doc_list
+    else:
+        return 'nothing'
 
 if __name__ == '__main__':
-    data = asyncio.run(get_docs_of_dates(1))
+    data = asyncio.run(send_spisok_doc())
     for d in data:
         print(d)
     # data = asyncio.run(send_wi())
