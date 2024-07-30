@@ -3,7 +3,8 @@ from pydantic import BaseModel, Field
 
 
 class SpisokDokumentov(BaseModel):
-    uid: Optional[str] = Field(None, description="Unique row identifier")
+    docid: Optional[str] = Field(None)
+    # uid: Optional[str] = Field(None, description="Unique row identifier")
     docdate: Optional[str] = Field(None)
     docType: Optional[str] = Field(None)
     docBarcode: Optional[str] = Field(None)

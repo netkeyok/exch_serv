@@ -7,6 +7,8 @@ from db_connections.db_conf import session
 
 
 def generate_number(mx_id):
+    # Если ни одного документа с необходимым отбором нет, выйдет ошибка, необходимо будет поправить...
+    # print(mx_id)
     with session.begin():
         # получаем префикс документа для заданного места хранения
         location_prefix = (

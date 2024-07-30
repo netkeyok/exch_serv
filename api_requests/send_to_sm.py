@@ -126,6 +126,7 @@ async def send_wi():
             if doclist.finished:
                 cv_date = doclist.createDate.strftime("%Y-%m-%dT%H:%M:%S")
                 date_doc = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                # print(doclist.warehouseId)
                 wi_id = generate_number(doclist.warehouseId)
                 items = await get_wi_items(doclist.id, wi_id)
                 # Создаем экземпляр модели

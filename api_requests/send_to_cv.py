@@ -16,9 +16,19 @@ from api_models.Supermag import IOSMIOSTORELOCATIONS, IOUSIOSMCONTRAGENT, OR
 from api_requests.get_from_sm import get_request, get_mesabbrev
 from db_connections.oramodels import SMStoreUnits, SMCard
 from db_connections.db_conf import session
-from config_urls import products_url, begin_product, end_product, contragents_url, begin_contragent, end_contragent, \
-    storelocs_sm_url, contragents_sm_url, begin_tables_spisokdokumentov, tables_spisokdokumentov, \
-    end_tables_spisokdokumentov
+from config_urls import (
+    products_url,
+    begin_product,
+    end_product,
+    contragents_url,
+    begin_contragent,
+    end_contragent,
+    storelocs_sm_url,
+    contragents_sm_url,
+    begin_tables_spisokdokumentov,
+    tables_spisokdokumentov,
+    end_tables_spisokdokumentov,
+)
 from config_urls import postuplenie_url, warehouse_url
 
 from api_models.Cleverence.Postuplenie import Postuplenie, DocumentItem
@@ -30,15 +40,19 @@ gmt5 = timezone(timedelta(hours=5))
 async def load_card(article):
     # Загрузка карточки на сервер Клеверенс
     # Получаем данные из базы
-    full_request = select(
-        SMCard.article,
-        SMCard.shortname,
-        SMCard.mesabbrev,
-        SMStoreUnits.unitname,
-        SMStoreUnits.barcode,
-        SMStoreUnits.quantity,
-    ).join(SMStoreUnits, SMCard.article == SMStoreUnits.article).where(
-        SMStoreUnits.article == article).order_by(SMStoreUnits.unitname)
+    full_request = (
+        select(
+            SMCard.article,
+            SMCard.shortname,
+            SMCard.mesabbrev,
+            SMStoreUnits.unitname,
+            SMStoreUnits.barcode,
+            SMStoreUnits.quantity,
+        )
+        .join(SMStoreUnits, SMCard.article == SMStoreUnits.article)
+        .where(SMStoreUnits.article == article)
+        .order_by(SMStoreUnits.unitname)
+    )
     result = session.execute(full_request)
     dict_iterator = result.mappings()
 
@@ -50,22 +64,22 @@ async def load_card(article):
 
     # Создаем пустые переменные
     packing_list = []
-    default_barcode = ''
+    default_barcode = ""
 
     # Проверяем наличие кол-ва для упаковок в карточке (у весовых может отсутсвовать, поэтому отсекаем.)
-    if not any(data['quantity'] is None for data in results):
+    if not any(data["quantity"] is None for data in results):
         # цикл по списку словарей
         for card in results:
             # добавление barcode в список по ключу unitname
-            if card['mesabbrev'] == card['unitname']:
-                pack_name = card['mesabbrev']
+            if card["mesabbrev"] == card["unitname"]:
+                pack_name = card["mesabbrev"]
             else:
-                pack_name = card['unitname'] + '_' + str(card['quantity'])
-            dict_packeges[pack_name].append(card['barcode'])
+                pack_name = card["unitname"] + "_" + str(card["quantity"])
+            dict_packeges[pack_name].append(card["barcode"])
 
         # Получаем кол-во в упаковке которое зашифровали на предыдущем шаге (пока ничего лучше не придумал.)
         for pack, barcode in dict_packeges.items():
-            pack_qnty = pack.split('_')
+            pack_qnty = pack.split("_")
             if len(pack_qnty) != 1:
                 pack_qnty = pack_qnty[-1]
             else:
@@ -82,7 +96,7 @@ async def load_card(article):
             packing_list.append(packing)
 
     else:
-        pack = results[0]['mesabbrev']
+        pack = results[0]["mesabbrev"]
         packing = {
             "name": pack,
             "unitsQuantity": 1,
@@ -93,11 +107,11 @@ async def load_card(article):
     #    Формирование json
     product = Product(
         id=article,
-        name=results[0]['shortname'],
+        name=results[0]["shortname"],
         packings=packing_list,
         barcode=default_barcode,
-        basePackingId=results[0]['mesabbrev'],
-        marking=article
+        basePackingId=results[0]["mesabbrev"],
+        marking=article,
     )
 
     session.close()
@@ -112,7 +126,7 @@ async def send_contragents():
     await post_request(begin_contragent)
     url = contragents_sm_url
     data_request = await get_request(url)
-    if 'data_text' in data_request:
+    if "data_text" in data_request:
         dictionary = json.loads(data_request[1])
         data_model = IOUSIOSMCONTRAGENT.DataModel(**dictionary)
         count = 0
@@ -127,7 +141,7 @@ async def send_contragents():
                     etoPapka=False,
                     iNN=row.INN,
                     naimenovanieDlyaPoiska=row.NAME,
-                    id=str(row.ID)
+                    id=str(row.ID),
                 )
 
                 contragents_json = contragents.model_dump_json(exclude_none=True)
@@ -141,15 +155,17 @@ async def send_articles():
     # Загрузка справочника товаров в Клеверенс
     start_time = time.time()
 
-    print('Начало загрузки данных')
+    print("Начало загрузки данных")
 
     # Передаем на сервер запрос на обновление справочника
     await post_request(begin_product)
 
     # получаем список всех article, удовлетворяющих условиям
-    query = select(SMCard.article).where(SMCard.receiptok == 1,
-                                         SMCard.accepted == 1,
-                                         exists().where(SMCard.article == SMStoreUnits.article))
+    query = select(SMCard.article).where(
+        SMCard.receiptok == 1,
+        SMCard.accepted == 1,
+        exists().where(SMCard.article == SMStoreUnits.article),
+    )
     cards = session.execute(query).fetchall()
     counter = 0
     # отправляем данные на сервер
@@ -162,15 +178,15 @@ async def send_articles():
     end_time = time.time()
     execution_time = (end_time - start_time) / 60
 
-    print('Загрузка данных закончена')
-    print(f'Время выполнения: {execution_time}')
-    return f'Загружено {counter} SKU'
+    print("Загрузка данных закончена")
+    print(f"Время выполнения: {execution_time}")
+    return f"Загружено {counter} SKU"
 
 
 async def send_storeloc():
     url = storelocs_sm_url
     data_request = await get_request(url)
-    if 'data_text' in data_request:
+    if "data_text" in data_request:
         # print(data_request[1])
         dictionary = json.loads(data_request[1])
         data_mod = IOSMIOSTORELOCATIONS.DataModel(**dictionary)
@@ -178,12 +194,10 @@ async def send_storeloc():
         for d in data_mod:
             locs = d[1].POSTOBJECT[0].IOSMIOSTORELOCATIONS.SMIOSTORELOCATIONS
             for loc in locs:
-                if loc.sClassTree[0] == '1':
+                if loc.sClassTree[0] == "1":
                     count += 1
                     warehouse = Warehouse(
-                        storageId=str(loc.iLocID),
-                        id=str(loc.iLocID),
-                        name=loc.sLocName
+                        storageId=str(loc.iLocID), id=str(loc.iLocID), name=loc.sLocName
                     )
                     warehouse_json = warehouse.model_dump_json(exclude_none=True)
                     print(warehouse_json)
@@ -220,21 +234,22 @@ async def send_storeloc():
 #             print('Произошла ошибка при запросе на сервер')
 #     return docs_list
 
+
 async def get_docs_of_dates(days: int):
     docs_list = []
     data_request = await get_request(postuplenie_url)
-    if 'data_json' in data_request:
+    if "data_json" in data_request:
         # Создание осведомлённого объекта datetime по GMT+5
         gmt_plus_five = timezone(timedelta(hours=5))
         cutoff_date = datetime.now(gmt_plus_five) - timedelta(days=days)
-        for data in data_request[1]['value']:
+        for data in data_request[1]["value"]:
             doclist = Postuplenie(**data)
             # Проверка, что createDate в формате datetime с tzinfo
             # Если createDate меньше или равно дате отсечки, добавляем в список
             if doclist.createDate <= cutoff_date:
                 docs_list.append((doclist.id, doclist.createDate))
             else:
-                print('Произошла ошибка при запросе на сервер')
+                print("Произошла ошибка при запросе на сервер")
     return docs_list
 
 
@@ -244,7 +259,7 @@ async def clear_old_docs(days):
     for doc in docs_id:
         await delete_request(url=postuplenie_url, doc_id=doc[0])
         count += 1
-    return f'Очищено {count} документов'
+    return f"Очищено {count} документов"
 
 
 async def send_or_to_cv(doc_dict):
@@ -258,7 +273,11 @@ async def send_or_to_cv(doc_dict):
         docitems = postobject.OR.SMSPECOR
         ourselfclient = postobject.OR.SMDOCOR[0].OURSELFCLIENT
         original_datetime = postobject.OR.SMDOCUMENTS[0].CREATEDAT
-        docprops = (postobject.OR.SMDOCPROPS[0].PARAMVALUE or []) if postobject.OR.SMDOCPROPS else None
+        docprops = (
+            (postobject.OR.SMDOCPROPS[0].PARAMVALUE or [])
+            if postobject.OR.SMDOCPROPS
+            else None
+        )
         formatted_datetime = original_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
         timezone_info = datetime.now(timezone.utc).astimezone().strftime("%z")
         formatted_datetime_with_timezone = f"{formatted_datetime}{timezone_info}"
@@ -297,6 +316,7 @@ async def send_or_to_cv(doc_dict):
         postuplenie_json = doc.model_dump_json(exclude_none=True)
         await post_request(postuplenie_url, postuplenie_json)
         spisokdok = SpisokDokumentov(
+            docid=docdata.ID,
             uid=docdata.ID,
             docdate=formatted_datetime_with_timezone,
             docType="Postuplenie",
@@ -312,8 +332,8 @@ async def send_or_to_cv(doc_dict):
     if doc_list:
         return doc_list
     else:
-        return 'nothing'
+        return "nothing"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(send_articles())
