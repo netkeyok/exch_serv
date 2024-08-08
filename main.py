@@ -4,7 +4,7 @@ import json
 from cm_datamining import parse_ui, parse_wi, parse_rl
 from api_requests.send_to_cv import send_or_to_cv, clear_old_docs
 from db_connections.get_from_sm import get_card
-from tasks.tasks import start_send_articles
+from tasks.tasks import start_send_articles, task_clear_old_doc_tables
 
 app = FastAPI()
 
@@ -16,29 +16,29 @@ async def upload_data(file: bytes = File()):
     # преобразуем строку в словарь
     dictionary = json.loads(string)
     # передаем словарь в модель Pydantic
-    docdict = dictionary['PACKAGE']['POSTOBJECT']
-    if 'UI' in docdict[0].keys():
-        print('start')
+    docdict = dictionary["PACKAGE"]["POSTOBJECT"]
+    if "UI" in docdict[0].keys():
+        print("start")
         parse_ui(dictionary)
-        print('end')
-    elif 'WI' in docdict[0].keys():
-        print('start')
+        print("end")
+    elif "WI" in docdict[0].keys():
+        print("start")
         parse_wi(dictionary)
-        print('end')
-    elif 'RL' in docdict[0].keys():
-        print('start')
+        print("end")
+    elif "RL" in docdict[0].keys():
+        print("start")
         parse_rl(dictionary)
-        print('end')
-    elif 'OR' in docdict[0].keys():
-        print('start receiving OR')
+        print("end")
+    elif "OR" in docdict[0].keys():
+        print("start receiving OR")
         # print(dictionary)
         doc_list = await send_or_to_cv(dictionary)
 
-        print(f'end receiving OR, sended {doc_list}')
+        print(f"end receiving OR, sended {doc_list}")
     else:
-        print('---------------------------------------')
+        print("---------------------------------------")
         # print(docdict[0].keys())
-        print('wrong data!!!')
+        print("wrong data!!!")
         print(docdict)
 
 
@@ -64,6 +64,14 @@ async def send_sku():
     return {"task_id": task.id}
 
 
+@app.post("/v1/func/clear_table_doc")
+async def send_sku():
+    # Отправляем задачу в очередь на выполнение через Celery, не ожидаем ее завершения
+    task = task_clear_old_doc_tables.delay()
+    # Возвращаем идентификатор задачи клиенту
+    return {"task_id": task.id}
+
+
 @app.get("/v1/func/task_status/{task_id}")
 async def get_task_status(task_id: str):
     # Получаем статус задачи по ее ID
@@ -71,5 +79,5 @@ async def get_task_status(task_id: str):
     return {
         "task_id": task_id,
         "status": task_result.status,
-        "result": task_result.result
+        "result": task_result.result,
     }

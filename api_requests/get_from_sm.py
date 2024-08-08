@@ -1,23 +1,41 @@
 import asyncio
 import json
 
-from api_models.Supermag import USIOMESABBREVINFO
-from config_urls import smcard_sm_url
+from api_models.Supermag import USIOMESABBREVINFO, OR
+from config_urls import smcard_sm_url, sm_doc_or_url
 from utils.requests import get_request
 
 
 async def get_mesabbrev(article):
-    url = f'{smcard_sm_url}{article}'
+    url = f"{smcard_sm_url}{article}"
     data_request = await get_request(url)
-    if 'data_text' in data_request:
+    if "data_text" in data_request:
         dictionary = json.loads(data_request[1])
         data_model = USIOMESABBREVINFO.DataModel(**dictionary)
         for js_data in data_model:
-            mesabbrev = js_data[1].POSTOBJECT[0].IOUSIOMESABBREVINFO.USIOMESABBREVINFO[0].MESABBREV
+            mesabbrev = (
+                js_data[1]
+                .POSTOBJECT[0]
+                .IOUSIOMESABBREVINFO.USIOMESABBREVINFO[0]
+                .MESABBREV
+            )
             return mesabbrev
 
 
-if __name__ == '__main__':
-    data = asyncio.run(get_mesabbrev('000827'))
-    print(data)
+async def get_or(doc_id):
+    url = f"{sm_doc_or_url}{doc_id}.json"
+    data_request = await get_request(url)
+    if "data_text" in data_request:
+        dictionary = json.loads(data_request[1])
+        data_model = OR.Data(**dictionary)
+        for js_data in data_model:
+            doc_or = js_data[1].POSTOBJECT[0].OR
+            summa = doc_or.SMDOCUMENTS[0].TOTALSUM
+            print(f"{doc_or} \n {summa}")
+
+
+if __name__ == "__main__":
+    asyncio.run(get_or("18ORA-E733908"))
+    # data = asyncio.run(get_mesabbrev('000827'))
+    # print(data)
     pass

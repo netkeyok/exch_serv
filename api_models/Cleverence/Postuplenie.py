@@ -8,7 +8,9 @@ class DocumentItem(BaseModel):
     # определяем атрибуты класса с аннотациями типов
     nomerStrokiDokumenta: Optional[int] = None
     uid: Optional[str] = None
-    createdBy: Optional[str] = None  # = Field(None, choices=[0, 1, 2, 3], read_only=True)
+    createdBy: Optional[str] = (
+        None  # = Field(None, choices=[0, 1, 2, 3], read_only=True)
+    )
     # createdBy: Optional[str] = '2'
     productId: Optional[str]
     declaredQuantity: Optional[float]
@@ -19,11 +21,17 @@ class DocumentItem(BaseModel):
     productMarking: Optional[str] = Field(None, write_only=True)
     productBarcode: Optional[str] = Field(None, write_only=True)
     packingName: Optional[str] = Field(None, write_only=True)
-    cena: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    cena: Optional[float] = (
+        None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    )
     CenaPriemki: Optional[float] = None
-    priceTotal: Optional[float] = None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    priceTotal: Optional[float] = (
+        None  # Необходимо вручную добавить дополнительное поле строки в документ в CV
+    )
     bindedLineUid: Optional[str] = None
     idEdinicyIzmereniya: Optional[str] = None
+    IdDokumenta: Optional[str] = None
+    KodStroki: Optional[int] = None
 
 
 class Postuplenie(BaseModel):
@@ -35,7 +43,7 @@ class Postuplenie(BaseModel):
     lastChangeDate: Optional[datetime] = None
     createDate: Optional[datetime] = None
     createdOnPDA: Optional[bool] = None
-    documentTypeName: str = 'Поступление'
+    documentTypeName: str = "Поступление"
     modified: Optional[bool] = None
     inProcess: Optional[bool] = None
     finished: Optional[bool] = None
@@ -51,5 +59,9 @@ class Postuplenie(BaseModel):
     deviceIP: Optional[str] = None
     idKontragenta: Optional[str] = None
     declaredItems: Optional[list[DocumentItem]] = Field(None, read_only=True)
-    summaDokumenta: Optional[float] = None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV
-    selfclient: Optional[int] = None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV
+    summaDokumenta: Optional[float] = (
+        None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV
+    )
+    selfclient: Optional[int] = (
+        None  # Необходимо вручную добавить дополнительное поле шапки в вид документа в CV
+    )

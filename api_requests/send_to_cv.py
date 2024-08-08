@@ -187,7 +187,6 @@ async def send_storeloc():
     url = storelocs_sm_url
     data_request = await get_request(url)
     if "data_text" in data_request:
-        # print(data_request[1])
         dictionary = json.loads(data_request[1])
         data_mod = IOSMIOSTORELOCATIONS.DataModel(**dictionary)
         count = 0
@@ -203,36 +202,6 @@ async def send_storeloc():
                     print(warehouse_json)
                     await post_request(warehouse_url, warehouse_json)
     return f"Выгружено {count} магазинов"
-
-
-# async def clear_postuplenie(doc_id):
-#     print(doc_id)
-#     async with aiohttp.ClientSession() as sessionapi:
-#         try:
-#             del_url_with_id = f'{postuplenie_url}({doc_id})'
-#             async with sessionapi.delete(del_url_with_id) as del_response:
-#                 print(del_response.status)
-#         except Exception as e:
-#             print(f'An error occurred: {e}')
-#     await sessionapi.close()
-
-
-# Используется в асинхронной функции для получения недавних документов
-# async def get_docs_of_dates(days: int):
-#     docs_list = []
-#     data_list = await get_request(postuplenie_url)
-#     # Создание осведомлённого объекта datetime по GMT+5
-#     gmt_plus_five = timezone(timedelta(hours=5))
-#     cutoff_date = datetime.now(gmt_plus_five) - timedelta(days=days)
-#     for data in data_list[1]:
-#         doclist = Postuplenie(**data)
-#         # Проверка, что createDate в формате datetime с tzinfo
-#         # Если createDate меньше или равно дате отсечки, добавляем в список
-#         if doclist.createDate <= cutoff_date:
-#             docs_list.append((doclist.id, doclist.createDate))
-#         else:
-#             print('Произошла ошибка при запросе на сервер')
-#     return docs_list
 
 
 async def get_docs_of_dates(days: int):
@@ -265,7 +234,6 @@ async def clear_old_docs(days):
 async def send_or_to_cv(doc_dict):
     data = OR.Data(**doc_dict)
     # получаем список постобъектов
-    # print(data)
     postobjects = data.PACKAGE.POSTOBJECT
     doc_list = []
     for postobject in postobjects:
@@ -333,6 +301,22 @@ async def send_or_to_cv(doc_dict):
         return doc_list
     else:
         return "nothing"
+
+
+async def clean_tables_list(days=7):
+    data_request = await get_request(tables_spisokdokumentov)
+    gmt_plus_five = timezone(timedelta(hours=5))
+    cutoff_date = str(datetime.now(gmt_plus_five) - timedelta(days=days))
+    if "data_json" in data_request:
+        count = 0
+        for data in data_request[1]["value"]:
+            doc_list = SpisokDokumentov(**data)
+            if doc_list.docdate <= cutoff_date:
+                await delete_request(url=tables_spisokdokumentov, doc_id=doc_list.uid)
+                count += 1
+            return f"Очищено {count} строк"
+    else:
+        return "Нет строк для очистки"
 
 
 if __name__ == "__main__":
