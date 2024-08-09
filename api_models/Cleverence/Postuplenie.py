@@ -30,12 +30,12 @@ class DocumentItem(BaseModel):
     )
     bindedLineUid: Optional[str] = None
     idEdinicyIzmereniya: Optional[str] = None
-    IdDokumenta: Optional[str] = None
+    idDokumenta: Optional[str] = None
     KodStroki: Optional[int] = None
 
 
 class Postuplenie(BaseModel):
-    id: str
+    id: Optional[str] = None
     name: Optional[str] = None
     appointment: Optional[str] = None
     userId: Optional[str] = None

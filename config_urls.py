@@ -30,12 +30,29 @@ tables_spisokdokumentov = f"{cleverence_url}Tables/SpisokDokumentov"
 
 # Раздел загрузки поставок
 postuplenie_url = f"{cleverence_url}Docs/Postuplenie"
-PostuplenieRuchnoe = f"{cleverence_url}Docs/PostuplenieRuchnoe"
+postuplenie_url_get_header = (
+    f"{cleverence_url}Docs/Postuplenie('{{doc_id}}')?$select=warehouseId,summaDokumenta,"
+    f"idKontragenta"
+)
+postuplenieruchnoe = f"{cleverence_url}Docs/PostuplenieRuchnoe"
 postuplenie_docline_list = (
     f"{cleverence_url}Docs/Postuplenie('{{doc_id}}')/declaredItems"
 )
 
+postuplenie_warehause_id_url = (
+    f"{cleverence_url}Docs/postuplenie('{{doc_id}}')?$select=warehouseId"
+)
+
 gruppovayapriemka_url = f"{cleverence_url}Docs/GruppovayaPriemka"
+gruppovayapriemka_url_get_header = (
+    f"{cleverence_url}Docs/GruppovayaPriemka?$select=id,finished"
+)
+gruppovayapriemka_items_url = (
+    f"{cleverence_url}Docs/GruppovayaPriemka('{{doc_id}}')/declaredItems"
+)
+gruppovayapriemka_warehause_id_url = (
+    f"{cleverence_url}Docs/GruppovayaPriemka('{{doc_id}}')?$select=warehouseId"
+)
 
 # Работа с выбором документов для загрузки
 

@@ -19,6 +19,7 @@ async def post_request(url, js_data=None):
                 print("Произошла ошибка при добавлении продукта на сервер")
                 print(status)
                 print(response)
+                return False
     return text
 
 
@@ -35,12 +36,14 @@ async def get_request(url, js_data=None, headers=None):
             except Exception:
                 # Если JSON невозможно получить, возвратим обычный текст ответа
                 response_text = await response.text()
-                if status not in (200, 201, 204):
-                    print(js_data)
-                    print("Произошла ошибка при запросе сервер")
-                    print(status)
-                    print(response)
-                return "data_text", response_text
+                # if status not in (200, 201, 204):
+                # print(js_data)
+                # print("Произошла ошибка при запросе сервер")
+                # print(status)
+                # print(response)
+
+                # return "data_text", response_text
+                return None
 
 
 async def delete_request(url: str, doc_id: str):

@@ -26,6 +26,9 @@ def initialize_db():
 
 
 def generate_document_number(prefix, wh_id):
+    # Инициализация базы данных при отсутствии
+    if not os.path.exists(DB_PATH):
+        initialize_db()
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
@@ -57,11 +60,9 @@ def generate_document_number(prefix, wh_id):
     return f"{prefix}{wh_id}{current_number:08d}"
 
 
-# Инициализация базы данных
 if __name__ == "__main__":
-    initialize_db()
-    #
-    # # Примеры использования
-    # print(generate_document_number("INV", "WH01"))  # Например, "WH01-INV00000001"
-    # print(generate_document_number("PO", "WH02"))  # Например, "WH02-PO00000001"
-    # print(generate_document_number("INV", "WH01"))  # Например, "WH01-INV00000002"
+    pass
+    # Примеры использования
+    # print(generate_document_number("INV", "WH01"))  # Например, "INVWH0100000001"
+    # print(generate_document_number("PO", "WH02"))   # Например, "POWH0200000001"
+    # print(generate_document_number("INV", "WH01"))  # Например, "INVWH0100000002"

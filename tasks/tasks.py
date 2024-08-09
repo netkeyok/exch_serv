@@ -3,9 +3,14 @@ import asyncio
 from celery import Celery
 from celery.schedules import crontab
 
-from api_requests.send_to_cv import send_articles, clear_old_docs, clean_tables_list
+from api_requests.send_to_cv import (
+    send_articles,
+    clear_old_docs,
+    clean_tables_list,
+    exchange_podbor_doc,
+)
 from db_connections.db_conf import REDIS_HOST, REDIS_PASS
-from api_requests.send_to_sm import send_wi
+from api_requests.send_to_sm import send_wi, exchange_gruppovayapriemka
 
 celery_app = Celery("tasks", broker=f"redis://:{REDIS_PASS}@{REDIS_HOST}:6379/0")
 celery_app.conf.timezone = "Asia/Yekaterinburg"
@@ -26,6 +31,14 @@ celery_app.conf.beat_schedule = {
     "clear-tables-weekly-at-23pm": {
         "task": "tasks.tasks.task_clear_old_doc_tables",
         "schedule": crontab(minute="0", hour="23"),
+    },
+    "add-every-1-minutes": {
+        "task": "tasks.tasks.task_exchange_podbor_doc",
+        "schedule": crontab(minute="1", hour="8-23"),
+    },
+    "add-every-minute": {
+        "task": "tasks.tasks.task_exchange_gruppovayapriemka",
+        "schedule": crontab(minute="1", hour="8-23"),
     },
 }
 
@@ -51,4 +64,16 @@ def task_clear_old_docs():
 @celery_app.task
 def task_clear_old_doc_tables():
     result = asyncio.run(clean_tables_list(7))
+    return result
+
+
+@celery_app.task
+def task_exchange_podbor_doc():
+    result = asyncio.run(exchange_podbor_doc())
+    return result
+
+
+@celery_app.task
+def task_exchange_gruppovayapriemka():
+    result = asyncio.run(exchange_gruppovayapriemka())
     return result

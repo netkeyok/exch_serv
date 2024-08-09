@@ -1,4 +1,3 @@
-# import asyncio
 import asyncio
 import json
 
@@ -13,6 +12,11 @@ from api_models.Cleverence.Contragents import Contragent
 from api_models.Cleverence.Tables_SpisokDokumentov import SpisokDokumentov
 from api_models.Cleverence.Warehouse import Warehouse
 from api_models.Supermag import IOSMIOSTORELOCATIONS, IOUSIOSMCONTRAGENT, OR
+from api_requests.get_from_cv import (
+    get_docs_podbor_docs,
+    get_tables_podbor_docs,
+    get_header_postuplenie,
+)
 from api_requests.get_from_sm import get_request, get_mesabbrev
 from db_connections.oramodels import SMStoreUnits, SMCard
 from db_connections.db_conf import session
@@ -28,10 +32,12 @@ from config_urls import (
     begin_tables_spisokdokumentov,
     tables_spisokdokumentov,
     end_tables_spisokdokumentov,
+    gruppovayapriemka_url,
+    postuplenie_docline_list,
 )
 from config_urls import postuplenie_url, warehouse_url
-
 from api_models.Cleverence.Postuplenie import Postuplenie, DocumentItem
+from utils.local_db_utils import generate_document_number
 from utils.requests import post_request, delete_request
 
 gmt5 = timezone(timedelta(hours=5))
@@ -319,5 +325,82 @@ async def clean_tables_list(days=7):
         return "Нет строк для очистки"
 
 
+async def create_doc_gruppovayapriemka(doc_list_id):
+    spec_list = []
+    warehouse_list = []
+    summa_doc = 0
+    ourselfclient = 0
+    formatted_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+    timezone_info = datetime.now(timezone.utc).astimezone().strftime("%z")
+    formatted_datetime_with_timezone = f"{formatted_datetime}{timezone_info}"
+    for doc_id in doc_list_id:
+        podbor_doc_url = postuplenie_docline_list.format(doc_id=doc_id)
+        data_lines_request = await get_request(podbor_doc_url)
+        if "data_json" in data_lines_request:
+            for data_lines in data_lines_request[1]["value"]:
+                data_docs = DocumentItem(**data_lines)
+                spec_items = DocumentItem(
+                    nomerStrokiDokumenta=data_docs.nomerStrokiDokumenta,
+                    productId=data_docs.productId,
+                    declaredQuantity=data_docs.declaredQuantity,
+                    idEdinicyIzmereniya=data_docs.packingId,
+                    packingId=data_docs.packingId,
+                    cena=data_docs.cena,
+                    CenaPriemki=data_docs.cena,
+                    IdDokumenta=doc_id,
+                )
+                spec_list.append(spec_items)
+        # Получаем шапку документа
+        request_data = await get_header_postuplenie(doc_id)
+        # url = f"{postuplenie_url}('{doc_id}')"
+        # doc_header_request = await get_request(url)
+        # if "data_json" in doc_header_request:
+        if request_data:
+            warehouse_list.append(request_data[0])
+            summa_doc += request_data[1]
+        #     result = Postuplenie(**doc_header_request[1])
+        #     warehouse_list.append(result.warehouseId)
+        #     summa_doc += result.summaDokumenta
+    warehouse_id = (
+        warehouse_list[0]
+        if warehouse_list.count(warehouse_list[0]) == len(warehouse_list)
+        else 0
+    )
+    id_doc = generate_document_number("GTMP", warehouse_id)
+    doc = Postuplenie(
+        id=id_doc,
+        name=f"Групповая приемка от: {formatted_datetime}",
+        createDate=formatted_datetime_with_timezone,
+        warehouseId=str(warehouse_id),
+        summaDokumenta=summa_doc,
+        declaredItems=spec_list,
+        selfclient=ourselfclient,
+        documentTypeName="Групповая приемка",
+    )
+    postuplenie_json = doc.model_dump_json(exclude_none=True)
+    if await post_request(gruppovayapriemka_url, postuplenie_json):
+        return True
+    else:
+        return False
+
+
+async def exchange_podbor_doc():
+    docs_count = 0
+    podbor_list = await get_docs_podbor_docs()
+    if podbor_list:
+        for doc_id in podbor_list:
+            doclist = await get_tables_podbor_docs(doc_id)
+            docs_count += 1
+            if await create_doc_gruppovayapriemka(doclist):
+                await delete_request(gruppovayapriemka_url, doc_id)
+            else:
+                return "Произошла ошибка!"
+        return f"Сформировано документов: {docs_count}"
+    else:
+        return "Нет документов"
+
+
 if __name__ == "__main__":
-    asyncio.run(send_articles())
+    asyncio.run(exchange_podbor_doc())
+    pass
+    # asyncio.run(send_articles())
