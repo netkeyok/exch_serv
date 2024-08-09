@@ -284,7 +284,6 @@ async def send_gruppovayapriemka_to_wi(doc_id, wi_id, items):
                 states = ET.fromstring(request_text)
                 state = states.find("state").text
                 if state == "Success":
-                    # print(wi_id, doclist.warehouseId)
                     send_post(doclist.warehouseId, wi_id)
                     result = f"send doc {wi_id}"
                     await delete_request(url=postuplenie_url, doc_id=doclist.id)
@@ -300,7 +299,6 @@ async def get_and_send_gruppovayapriemka(data_documents):
         wi_id_url = postuplenie_warehause_id_url.format(doc_id=doc_id)
         wi_id_request = await get_request(wi_id_url)
         if wi_id_request:
-            print(wi_id_request)
             wi_id = generate_number(wi_id_request[1]["warehouseId"])
             result_data = await get_json_gruppovayapriemka_items(wi_id, document)
             if result_data:
@@ -316,7 +314,6 @@ async def parsing_gruppovayapriemka(doc_id):
     data_request = await get_request(doc_url)
     grupped_docs = defaultdict(list)
     if data_request:
-        # print(data_request)
         if "data_json" in data_request:
             for data_doc in data_request[1]["value"]:
                 doc_id = data_doc["idDokumenta"]

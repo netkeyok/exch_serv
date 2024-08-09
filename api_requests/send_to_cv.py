@@ -326,8 +326,9 @@ async def clean_tables_list(days=7):
 
 
 async def create_doc_gruppovayapriemka(doc_list_id):
+    # print(doc_list_id)
     spec_list = []
-    warehouse_list = []
+    warehouse_id = 0
     summa_doc = 0
     ourselfclient = 0
     formatted_datetime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
@@ -347,25 +348,14 @@ async def create_doc_gruppovayapriemka(doc_list_id):
                     packingId=data_docs.packingId,
                     cena=data_docs.cena,
                     CenaPriemki=data_docs.cena,
-                    IdDokumenta=doc_id,
+                    idDokumenta=doc_id,
                 )
                 spec_list.append(spec_items)
         # Получаем шапку документа
         request_data = await get_header_postuplenie(doc_id)
-        # url = f"{postuplenie_url}('{doc_id}')"
-        # doc_header_request = await get_request(url)
-        # if "data_json" in doc_header_request:
         if request_data:
-            warehouse_list.append(request_data[0])
             summa_doc += request_data[1]
-        #     result = Postuplenie(**doc_header_request[1])
-        #     warehouse_list.append(result.warehouseId)
-        #     summa_doc += result.summaDokumenta
-    warehouse_id = (
-        warehouse_list[0]
-        if warehouse_list.count(warehouse_list[0]) == len(warehouse_list)
-        else 0
-    )
+            warehouse_id = request_data[0]
     id_doc = generate_document_number("GTMP", warehouse_id)
     doc = Postuplenie(
         id=id_doc,
@@ -377,7 +367,7 @@ async def create_doc_gruppovayapriemka(doc_list_id):
         selfclient=ourselfclient,
         documentTypeName="Групповая приемка",
     )
-    postuplenie_json = doc.model_dump_json(exclude_none=True)
+    postuplenie_json = doc.model_dump_json(indent=4, exclude_none=True)
     if await post_request(gruppovayapriemka_url, postuplenie_json):
         return True
     else:
@@ -390,11 +380,13 @@ async def exchange_podbor_doc():
     if podbor_list:
         for doc_id in podbor_list:
             doclist = await get_tables_podbor_docs(doc_id)
-            docs_count += 1
-            if await create_doc_gruppovayapriemka(doclist):
-                await delete_request(gruppovayapriemka_url, doc_id)
-            else:
-                return "Произошла ошибка!"
+            if doclist:
+                docs_count += 1
+                if await create_doc_gruppovayapriemka(doclist):
+                    pass
+                    await delete_request(gruppovayapriemka_url, doc_id)
+                else:
+                    return "Произошла ошибка!"
         return f"Сформировано документов: {docs_count}"
     else:
         return "Нет документов"

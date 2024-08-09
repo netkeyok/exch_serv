@@ -7,6 +7,8 @@ from typing import Optional
 class DocumentItem(BaseModel):
     # определяем атрибуты класса с аннотациями типов
     nomerStrokiDokumenta: Optional[int] = None
+    idDokumenta: Optional[str] = None
+    KodStroki: Optional[int] = None
     uid: Optional[str] = None
     createdBy: Optional[str] = (
         None  # = Field(None, choices=[0, 1, 2, 3], read_only=True)
@@ -30,8 +32,6 @@ class DocumentItem(BaseModel):
     )
     bindedLineUid: Optional[str] = None
     idEdinicyIzmereniya: Optional[str] = None
-    idDokumenta: Optional[str] = None
-    KodStroki: Optional[int] = None
 
 
 class Postuplenie(BaseModel):
