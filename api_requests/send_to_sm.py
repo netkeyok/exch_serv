@@ -328,7 +328,11 @@ async def exchange_gruppovayapriemka():
     if docs_list:
         for doc_id in docs_list:
             document = await parsing_gruppovayapriemka(doc_id)
-            await get_and_send_gruppovayapriemka(document)
+            result = await get_and_send_gruppovayapriemka(document)
+            if result:
+                return result
+            else:
+                return "Нет документов"
 
 
 if __name__ == "__main__":
