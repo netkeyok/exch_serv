@@ -203,6 +203,7 @@ async def get_json_gruppovayapriemka_items(wi_id, document):
 
 
 async def send_gruppovayapriemka_to_wi(doc_id, wi_id, items):
+    result = ""
     url = f"{postuplenie_url}({doc_id})"
     data_request = await get_request(url)
     if "data_json" in data_request:
