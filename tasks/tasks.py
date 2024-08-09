@@ -1,4 +1,5 @@
 import asyncio
+from datetime import timedelta
 
 from celery import Celery
 from celery.schedules import crontab
@@ -32,13 +33,13 @@ celery_app.conf.beat_schedule = {
         "task": "tasks.tasks.task_clear_old_doc_tables",
         "schedule": crontab(minute="0", hour="23"),
     },
-    "add-every-1-minutes": {
+    "add-every-30-seconds-task1": {
         "task": "tasks.tasks.task_exchange_podbor_doc",
-        "schedule": crontab(minute="1", hour="8-23"),
+        "schedule": timedelta(seconds=30),
     },
-    "add-every-minute": {
+    "add-every-30-seconds-task2": {
         "task": "tasks.tasks.task_exchange_gruppovayapriemka",
-        "schedule": crontab(minute="1", hour="8-23"),
+        "schedule": timedelta(seconds=30),
     },
 }
 
